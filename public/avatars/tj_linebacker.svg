@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of TJ Okafor">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 2.1s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#c9d7e4"/>
+
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#8a2432" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#7b4b2f" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#8a2432" stroke="#2b2620" stroke-width="2.5"/><path d="M48 88 q12 9 24 0" fill="none" stroke="#f3eddf" stroke-width="4"/><text x="60" y="114" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="20" fill="#f3eddf">52</text><path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#7b4b2f" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="38" cy="59" r="5.5" fill="#7b4b2f" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#7b4b2f" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#7b4b2f" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="45" cy="66" r="4.5" fill="#e8907a" opacity=".35"/><circle cx="75" cy="66" r="4.5" fill="#e8907a" opacity=".35"/>
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 50 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="3" stroke-linecap="round"/><path d="M64 50 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="3" stroke-linecap="round"/><rect x="46" y="63" width="10" height="3" rx="1" fill="#1b1815"/><rect x="64" y="63" width="10" height="3" rx="1" fill="#1b1815"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+
+<path d="M50 70 q10 8 20 0 z" fill="#fff" stroke="#2b2620" stroke-width="2.2"/>
+<path d="M38 50 C38 28 82 28 82 50 C78 40 70 36 60 36 C50 36 42 40 38 50 Z" fill="#1f1a17" stroke="#2b2620" stroke-width="2.5"/>
+</g>
+</svg>

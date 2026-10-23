@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of Hannah Whitfield">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 2.7s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#f2dde0"/>
+<circle cx="38" cy="66" r="9" fill="#a5532e" stroke="#2b2620" stroke-width="2.5"/><circle cx="82" cy="66" r="9" fill="#a5532e" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#7aa37a" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#f3d1b5" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M46 87 q14 10 28 0" fill="none" stroke="#2b2620" stroke-width="2.2"/><circle cx="34" cy="106" r="3" fill="#f3eddf"/><circle cx="86" cy="104" r="3" fill="#f3eddf"/><circle cx="60" cy="112" r="3" fill="#f3eddf"/>
+<circle cx="38" cy="59" r="5.5" fill="#f3d1b5" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#f3d1b5" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#f3d1b5" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="45" cy="66" r="4.5" fill="#e8907a" opacity=".35"/><circle cx="75" cy="66" r="4.5" fill="#e8907a" opacity=".35"/>
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 50 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="2.6" stroke-linecap="round"/><path d="M64 50 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="2.6" stroke-linecap="round"/><path d="M46 55 l-3 -2 M74 55 l3 -2" stroke="#2b2620" stroke-width="1.8" stroke-linecap="round"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+
+<path d="M51 69 q9 8 18 0" fill="#b5413a" stroke="#2b2620" stroke-width="2.2"/>
+<path d="M37 54 C36 40 44 36 50 40 C54 36 66 36 70 40 C76 36 84 40 83 54 C78 46 70 44 60 44 C50 44 42 46 37 54 Z" fill="#a5532e" stroke="#2b2620" stroke-width="2.5"/><path d="M36 44 C36 22 84 22 84 44 C74 38 46 38 36 44 Z" fill="#c2372e" stroke="#2b2620" stroke-width="2.5"/><circle cx="48" cy="34" r="2" fill="#f3eddf"/><circle cx="60" cy="30" r="2" fill="#f3eddf"/><circle cx="72" cy="34" r="2" fill="#f3eddf"/><circle cx="54" cy="40" r="1.6" fill="#f3eddf"/><circle cx="66" cy="40" r="1.6" fill="#f3eddf"/><path d="M58 22 C50 10 44 16 52 22 Z M62 22 C70 10 76 16 68 22 Z" fill="#c2372e" stroke="#2b2620" stroke-width="2.2"/>
+</g>
+</svg>

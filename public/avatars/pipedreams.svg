@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of Gus Petrakis">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 4.2s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#cfe0df"/>
+
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#3f6a9a" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#e2b189" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M48 86 l12 8 l12 -8" fill="none" stroke="#2b2620" stroke-width="2.2"/><rect x="70" y="100" width="20" height="10" rx="2" fill="#f3eddf" stroke="#2b2620" stroke-width="1.8"/><text x="80" y="108" text-anchor="middle" font-family="Georgia,serif" font-size="7" font-weight="700" fill="#2b2620">GUS</text>
+<circle cx="38" cy="59" r="5.5" fill="#e2b189" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#e2b189" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#e2b189" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="45" cy="66" r="4.5" fill="#e8907a" opacity=".35"/><circle cx="75" cy="66" r="4.5" fill="#e8907a" opacity=".35"/>
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 49 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="3.4" stroke-linecap="round"/><path d="M64 49 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="3.4" stroke-linecap="round"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+<path d="M47 68 C50 63 58 64 60 66 C62 64 70 63 73 68 C70 72 64 70 60 69 C56 70 50 72 47 68 Z" fill="#3b2c22" stroke="#2b2620" stroke-width="2"/>
+<path d="M55 75 q5 3 10 0" fill="none" stroke="#2b2620" stroke-width="2.2" stroke-linecap="round"/>
+<path d="M37 46 C37 26 83 26 83 46 Z" fill="#23365c" stroke="#2b2620" stroke-width="2.5"/><path d="M36 46 C50 42 92 42 98 48 C88 52 50 50 36 48 Z" fill="#1b2a49" stroke="#2b2620" stroke-width="2.5"/><circle cx="60" cy="27" r="2.5" fill="#1b2a49"/>
+</g>
+</svg>

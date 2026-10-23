@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of Marcus Bell">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 1.6s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#e3dccb"/>
+
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#3e6b4f" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#8e5b3c" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M44 88 C48 98 72 98 76 88" fill="none" stroke="#2b2620" stroke-width="2.2"/><path d="M50 94 v12 M70 94 v12" stroke="#f3eddf" stroke-width="2"/><path d="M84 94 l9 5 v10 l-9 5 l-9 -5 v-10 z" fill="#d8b44a" stroke="#2b2620" stroke-width="2"/><text x="84" y="108" text-anchor="middle" font-family="Georgia,serif" font-size="7" font-weight="700" fill="#2b2620">20</text>
+<circle cx="38" cy="59" r="5.5" fill="#8e5b3c" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#8e5b3c" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#8e5b3c" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="45" cy="66" r="4.5" fill="#e8907a" opacity=".35"/><circle cx="75" cy="66" r="4.5" fill="#e8907a" opacity=".35"/>
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 48 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="3" stroke-linecap="round"/><path d="M64 50 q5 -3 10 -2" fill="none" stroke="#2b2620" stroke-width="3" stroke-linecap="round"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+<path d="M40 64 C40 82 50 86 60 86 C70 86 80 82 80 64 C76 74 70 76 60 76 C50 76 44 74 40 64 Z" fill="#1f1714" stroke="#2b2620" stroke-width="2.2"/>
+<path d="M53 70 q7 5 14 0" fill="none" stroke="#f3eddf" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M30 44 C40 38 80 38 90 44 C80 48 40 48 30 44 Z" fill="#4b3577" stroke="#2b2620" stroke-width="2.5"/><path d="M40 43 C46 30 52 14 70 4 C66 16 74 30 80 43 Z" fill="#5d4391" stroke="#2b2620" stroke-width="2.5"/><path d="M56 28 l1.5 3 3 .5 -2.2 2 .6 3 -2.9 -1.5 -2.9 1.5 .6 -3 -2.2 -2 3 -.5 z" fill="#e8c95a"/><circle cx="68" cy="36" r="1.8" fill="#e8c95a"/><circle cx="64" cy="18" r="1.4" fill="#e8c95a"/>
+</g>
+</svg>

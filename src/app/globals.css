@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+/*
+  Bookish tokens: like reading on an e-reader or bone-coloured paper.
+  Literata (the typeface made for e-books), warm off-white paper, soft
+  black ink, hairline rules, and one oxblood accent like a bookmark ribbon.
+  Contrast on paper: ink 14.7:1, muted 5.7:1, accent 7.2:1, field
+  borders 3.2:1.
+*/
+@theme inline {
+  --color-paper: #f3eddf;
+  --color-surface: #faf6ec;
+  --color-ink: #1f1b16;
+  --color-muted: #635b4f;
+  --color-rule: #ddd3bf;
+  --color-line: #8f8472;
+  --color-hover: #ebe3d0;
+  --color-accent: #8b2e1f;
+  --color-accent-hover: #74261a;
+  --color-accent-pressed: #5f1f15;
+  --color-danger: #9e2a1b;
+  --color-success: #2f6b45;
+  --color-disabled: #e6dfcf;
+  --color-disabled-ink: #8f8472;
+  --font-serif: var(--font-literata);
+  --font-sans: var(--font-literata);
+}
+
+/*
+  Always light, like paper, even when the device is in dark mode. "html body"
+  outranks any page-level body style (Next's built-in 404 page ships a dark
+  one, and Next keeps visited pages mounted, so it used to leak into the feed).
+*/
+:root {
+  color-scheme: light;
+}
+
+html body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* One focus ring for every control */
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
+/* Small label for fields, tabs and section kickers. Sentence case, not shouty. */
+@utility label {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* A post arriving while you read */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    background: var(--color-surface);
+  }
+}
