@@ -1,5 +1,7 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { Literata } from "next/font/google";
+import { Suspense } from "react";
 import { NavBar, RouteFocus, TabBar } from "@/components/NavBar";
 import { Session } from "@/components/Session";
 import "./globals.css";
@@ -13,22 +15,45 @@ export const metadata: Metadata = {
   description: "Add friends and read what they post. Text only.",
 };
 
+// Clerk's sign-in and account screens in Kinnect's paper, ink and oxblood
+const clerkAppearance = {
+  variables: {
+    colorPrimary: "#8b2e1f",
+    colorBackground: "#faf6ec",
+    colorForeground: "#1f1b16",
+    colorMutedForeground: "#635b4f",
+    colorInput: "#faf6ec",
+    colorInputForeground: "#1f1b16",
+    colorBorder: "#8f8472",
+    fontFamily: "var(--font-literata)",
+    borderRadius: "1rem",
+  },
+};
+
+// The nav reads the current path, which a catch-all route (like Clerk's
+// sign-in) only knows at request time, so it sits in Suspense.
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${literata.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col pb-[calc(3.5rem+env(safe-area-inset-bottom))] font-sans sm:pb-0">
-        <NavBar />
-        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-2xl flex-1 px-4 py-6 sm:py-8">
-          <Session />
-          {children}
-        </main>
-        <footer className="border-t border-rule">
-          <p className="mx-auto max-w-2xl px-4 py-4 text-[15px] italic text-muted">
-            Sample friends · saved on this device
-          </p>
-        </footer>
-        <TabBar />
-        <RouteFocus />
+        <ClerkProvider appearance={clerkAppearance}>
+          <Suspense>
+            <NavBar />
+          </Suspense>
+          <main id="main" tabIndex={-1} className="mx-auto w-full max-w-2xl flex-1 px-4 py-6 sm:py-8">
+            <Session />
+            {children}
+          </main>
+          <footer className="border-t border-rule">
+            <p className="mx-auto max-w-2xl px-4 py-4 text-[15px] italic text-muted">
+              Sample friends · saved on this device
+            </p>
+          </footer>
+          <Suspense>
+            <TabBar />
+            <RouteFocus />
+          </Suspense>
+        </ClerkProvider>
       </body>
     </html>
   );

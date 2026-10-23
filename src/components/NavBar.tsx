@@ -1,5 +1,6 @@
 "use client";
 
+import { UserButton, useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
@@ -38,9 +39,12 @@ function TabLinks({ mobile }: { mobile?: boolean }) {
 
 // The top bar on every page. From the sm breakpoint up it holds the tabs too;
 // on a phone they're in TabBar at the bottom instead. The current page is
-// marked with the accent and aria-current.
+// marked with the accent and aria-current. Signed out, it offers only sign in
+// and sign up; signed in, the tabs, Write and Clerk's account menu (which has
+// sign out). Until Clerk knows which, the right side stays empty.
 export function NavBar() {
   const pathname = usePathname();
+  const { isLoaded, isSignedIn } = useAuth();
 
   return (
     <header className="sticky top-0 z-20 border-b border-rule bg-paper">
@@ -54,16 +58,33 @@ export function NavBar() {
         <Link href="/" className="mr-auto py-1 text-2xl font-semibold italic tracking-tight">
           Kinnect
         </Link>
-        <nav aria-label="Main" className="hidden sm:block">
-          <TabLinks />
-        </nav>
-        <ButtonLink
-          href="/post/new"
-          aria-current={pathname === "/post/new" ? "page" : undefined}
-          className="px-4 aria-[current=page]:ring-2 aria-[current=page]:ring-ink aria-[current=page]:ring-offset-2 aria-[current=page]:ring-offset-paper"
-        >
-          Write
-        </ButtonLink>
+        {isLoaded && isSignedIn && (
+          <>
+            <nav aria-label="Main" className="hidden sm:block">
+              <TabLinks />
+            </nav>
+            <ButtonLink
+              href="/post/new"
+              aria-current={pathname === "/post/new" ? "page" : undefined}
+              className="px-4 aria-[current=page]:ring-2 aria-[current=page]:ring-ink aria-[current=page]:ring-offset-2 aria-[current=page]:ring-offset-paper"
+            >
+              Write
+            </ButtonLink>
+            <div className="flex min-h-11 min-w-11 items-center justify-center">
+              <UserButton />
+            </div>
+          </>
+        )}
+        {isLoaded && !isSignedIn && (
+          <>
+            <ButtonLink href="/sign-in" variant="quiet">
+              Sign in
+            </ButtonLink>
+            <ButtonLink href="/sign-up" className="px-4">
+              Sign up
+            </ButtonLink>
+          </>
+        )}
       </div>
     </header>
   );
@@ -72,6 +93,8 @@ export function NavBar() {
 // Mobile first: on a phone the tabs sit in a bar at the bottom, where a thumb
 // reaches them. It's last in the page, so Tab order matches what you see.
 export function TabBar() {
+  const { isSignedIn } = useAuth();
+  if (!isSignedIn) return null;
   return (
     <nav
       aria-label="Main"
