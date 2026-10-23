@@ -122,3 +122,25 @@ Ran `npx -y clerk@latest init --app <my dashboard app> --no-skills`, after `cler
 |---|---|
 | `/`, `/sign-in`, `/sign-up` | `200` |
 | `/feed`, `/friends`, `/friends/add`, `/me`, `/post/new`, `/api/books` | `307` → `/sign-in?redirect_url=…` |
+
+### Passwordless sign-in with passkeys (my idea, added in step 4)
+
+I wanted sign-in to be super simple and secure: never a password, just Face ID or a fingerprint.
+
+- **Passkey-only isn't possible.** Clerk needs an email to create and recover the account. So it's: sign up with name, email and a 6-digit code, then add a passkey. After that, sign-ins are just the passkey, with the email code as the fallback.
+- **The identifier is the email I type at sign-up**, proven by the code. It doesn't have to match my Apple or Google account. Apple and Google only store and sync the passkey (iCloud Keychain, Google Password Manager). Inside Kinnect and Supabase, the identity is the **Clerk user ID**, not the email.
+- **Why passkeys are secure:** no password to leak or reuse, they only work on the exact site they were made for (phishing-proof), and Face ID only unlocks the key on the phone, so no biometric data ever reaches Kinnect or Clerk.
+- **Development vs production:** classmates can sign up on the development instance (with a "Development mode" badge and a user cap). Passkeys are tied to a domain, so a `localhost` passkey won't work on the Vercel site.
+
+**Clerk config change** (`clerk config pull` to read, then `clerk config patch --dry-run`, then apply):
+
+| Setting | Before | After |
+|---|---|---|
+| Passwords | on, **required** (min 15 chars) | **off** |
+| Passkeys for sign-in | off (button and autofill already allowed) | **on** |
+| Email code sign-in | on | on (sign-up and fallback) |
+| First and last name | optional | **required** (People needs names) |
+
+**App change:** `PasskeyPrompt` shows a banner to signed-in users with no passkey on a browser that supports them. It calls Clerk's `user.createPasskey()`, ignores a cancelled Face ID sheet, explains other errors, and remembers "Not now" on the Clerk user.
+
+**Caught:** `clerk config pull` showed first and last name were *enabled but not required*, even though the plan said to require them.
