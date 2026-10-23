@@ -149,3 +149,18 @@ I wanted sign-in to be super simple and secure: never a password, just Face ID o
 - The **"Add a passkey" banner** now comes back on every visit until you add one. "Not now" hides it for that visit only (it used to hide it forever).
 - **The sign-in page leads with a big "Sign in with passkey" button**, with Clerk's email-code form below it as the fallback. Browsers (Safari especially) won't open the Face ID sheet unless the person taps something, so one tap plus Face ID is the fastest sign-in a page can offer. Clerk's form also offers your passkey as an autofill suggestion.
 - **Security detail:** after a passkey sign-in, the app returns you to the page you were bounced from (`redirect_url`), but only if that URL is on Kinnect itself. Otherwise a crafted link could send someone to another site right after they sign in (an "open redirect").
+
+**Ask:** "Show me how the Clerk CLI works: what clerk init added to my project, file by file."
+
+How the CLI works: `clerk auth login` (in my terminal) saves a token in the macOS credential store. `init` uses that token to call Clerk's API **as me**: it links the folder to my app (remembered through the git remote), detects Next.js and npm, installs the SDK, writes files, and fetches my dev keys into `.env.local`. That's why I never pasted the Clerk keys myself.
+
+| File | What `init` did | What I changed after review |
+|---|---|---|
+| `package.json` / lockfile | added `@clerk/nextjs` (components, hooks, `auth()`, `clerkMiddleware`) | — |
+| `src/proxy.ts` (new) | `clerkMiddleware()` runs before every matching request (skipping static files, always on `/api`), verifies the session cookie, and makes `auth()` work | it blocked no one, so I added `createRouteMatcher` and `auth.protect()` |
+| `src/app/layout.tsx` | wrapped `<body>` contents in `<ClerkProvider>`, which loads Clerk in the browser and shares sign-in state | fixed indentation and the final newline; added Kinnect's `appearance` |
+| `sign-in/[[...sign-in]]/page.tsx` (new) | Clerk's `<SignIn />`. The optional catch-all route covers Clerk's multi-screen flow (`/sign-in/factor-one`, …) | wrapped in `<Suspense>` (the build failed); passkey button on top |
+| `sign-up/[[...sign-up]]/page.tsx` (new) | `<SignUp />`, same pattern | wrapped in `<Suspense>` |
+| `.env.local` (gitignored) | Clerk publishable and secret keys, plus the sign-in/up route settings | — (the agent never read it) |
+
+**In one sentence:** `clerk init` installed Clerk's SDK, added a proxy that identifies every request, a provider that shares sign-in state with the UI, catch-all sign-in and sign-up pages, and fetched my dev keys into `.env.local`. It left every route public and broke the build, and catching and fixing that was my job.
