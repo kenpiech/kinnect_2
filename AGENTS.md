@@ -10,15 +10,62 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Kinnect
 
-A text-only social app: add people as friends and read what they post. Spelled with two n's.
+A small social network for classmates who read: save books to your library, add friends, and post about what you're reading. Spelled with two n's. Version 2 of Assignment 3 (which was a localStorage-only prototype).
+
+**The rule everything follows: your library is private, and your posts are shared with your friends.**
+
+## Stack
+- Next.js 16 and Tailwind CSS
+- **Clerk** for accounts (development keys only)
+- **Supabase** (Postgres) for data, connected to Clerk through Supabase third-party auth
+- **Open Library** for book search (no key)
+- Deployed on Vercel's Hobby plan
 
 ## Product facts
-- **No backend.** There's no database, no accounts and no external APIs. All data lives in the browser's localStorage.
-- **Simulated network.** The friends are seeded sample people (`src/data/people.ts`). Each post has a `dayOffset` and an `hour`, and it goes live at `firstVisit + dayOffset days + hour`, so coming back on a later day shows new posts. The UI says these are sample friends saved on this device.
-- **One storage module.** Only `src/lib/store.ts` touches localStorage, under one versioned key (`kinnect:v1`). Keep it that way, so a real database can replace it later.
+- **Real friends only.** Friends are other signed-up users. A friendship starts as a request and counts only once the other person accepts. The A3 sample personas (`src/data/people.ts`, `public/avatars/`) appear **only** as static sample posts on the signed-out landing page (`/`), never as friends.
+- **Signed out, you see nothing real.** Every route except `/` and the Clerk sign-in/sign-up pages requires a session.
+- **Library tab:** search Open Library and save books. Your library is private, even from friends.
+- **People tab:** list and search other users. Request, Accept and Remove (Remove also covers decline, cancel and unfriend).
+- **Posts:** up to 280 characters, optionally about one book from your library. Your feed shows your posts and your accepted friends' posts, newest first.
+- **Tabs:** Feed · Library · People · Me.
+
+## Data model
+Four tables in Supabase. Every ID that names a person is a **Clerk user ID** (`text`), and columns that record "who did this" default to `auth.jwt()->>'sub'`. Below, **me** means `auth.jwt()->>'sub'`.
+
+| Table | Columns | Who can do what (RLS) |
+|---|---|---|
+| `profiles` | `user_id` text PK, `display_name` text, `created_at` | **read:** any signed-in user (People needs names). **insert/update:** own row only. |
+| `library_items` | `id`, `user_id`, `ol_key` (e.g. `/works/OL27482W`), `title`, `author`, `cover_id` (nullable), `year` (nullable), `added_at`; unique (`user_id`, `ol_key`) | **read/insert/delete:** own rows only. Private, even from friends. |
+| `friendships` | `id`, `requester_id`, `addressee_id`, `status` (`pending` or `accepted`), `created_at`; one row per pair of people | **read:** either person. **insert:** requester is me, status `pending`. **update:** addressee is me (to accept). **delete:** either person. |
+| `posts` | `id`, `user_id`, `body` (1–280 chars), `book_ol_key`, `book_title`, `book_author` (all nullable), `created_at` | **read:** my posts, or posts by someone I have an **accepted** friendship with. **insert/delete:** own only. |
+
+- **A post copies the book's details** instead of pointing at a `library_items` row. Friends can't read your library, so a link would show up broken for them.
+- **A profile is created on first sign-in** (an upsert from the Clerk name). No webhook.
+- **RLS is on for every table, and the `anon` role has no policies.** Never turn RLS off, never add a `using (true)` read policy (except the deliberate test break, which is reverted), and never use the Supabase secret/service-role key in the app.
+- **App queries rely on RLS.** Don't add `.eq('user_id', …)` filters that duplicate a policy. The Playwright test proves RLS works, and redundant filters would hide a broken policy.
+- Schema changes are **migrations** (through the Supabase MCP server), never edits in the dashboard.
+
+## Where things happen
+- **Who you are:** Clerk's proxy/middleware and `auth()` on the server.
+- **What you may see:** Supabase RLS. `src/lib/supabase.ts` creates a server-side client per request whose `accessToken` is the Clerk session token.
+- **Data access:** server components and server actions in `src/lib/data.ts`. Pages don't talk to Supabase directly. `src/lib/store.ts` (localStorage) keeps only unsent post drafts.
+- **Open Library is called from the server,** through `/api/books?q=`, which proxies `https://openlibrary.org/search.json` with `fields=key,title,author_name,first_publish_year,cover_i&limit=20`. It sends a User-Agent with contact info (as Open Library asks), caches results, and times out after 8 s. Covers load in the browser from `https://covers.openlibrary.org/b/id/<cover_id>-M.jpg`.
+- **Open Library states:** loading, nothing found (`numFound: 0` is a 200, not an error), unavailable (timeout or non-200, with retry), and empty library. When search is down, your saved library still shows, since it comes from Supabase. Empty searches are never sent. `cover_i` and `first_publish_year` can be missing or wrong, so the UI never depends on them.
+
+## Keys
+- Keys live in `.env.local`, which the user writes by hand. `.claude/settings.json` denies reading `.env` and `.env.*`. **Never try to read, print or write env files**, and never put a key in code, commits, logs or the README.
+- Only the Clerk publishable key and the Supabase URL and publishable key may reach the browser (`NEXT_PUBLIC_*`). The Clerk secret key stays server-side.
+
+## Design rules (carried over from A3)
 - **Mobile first.** Design for a phone first: tabs in a bottom bar, tap targets of at least 44px, one column. Wider screens get the same column, with the tabs moved into the top bar.
-- **Text-only posts.** Posts have no images for now. The sample friends have cartoon SVG avatars in `public/avatars/`, drawn by `scripts/avatars.py`. Change the script and rerun it; don't hand-edit the SVGs.
 - **Style.** Bookish, like an e-reader or bone-coloured paper: Literata (serif), warm paper `#f3eddf`, soft black ink, hairline rules, rounded pill buttons, and one oxblood accent like a bookmark ribbon. Approachable rather than techie: sentence case, no all-caps labels. Tokens live in `src/app/globals.css`. Use the shared components in `src/components/`; don't restyle one-off elements.
+- **Mostly text.** Posts are text. A post's book shows as its title and author. Book covers appear in the Library, with a designed no-cover fallback.
 - **Forms.** One column. Every field has a real `<label>`. Errors sit under the field (linked with `aria-describedby`) and say what to do next, and the typed value is never cleared on error.
 - **Accessibility.** Everything works with a keyboard, and focus is always visible.
-- **Dependencies.** Don't add packages beyond what create-next-app installed unless the user agrees.
+
+## Workflow
+- Work on branch `full-stack`. Run `/security-review` before merging to `main`.
+- One commit per step, then pause for the user to review. Record each step's "Ask your agent" question and answer, plus anything caught, in `learning.md`.
+- **Dependencies:** beyond create-next-app's packages, only `@clerk/nextjs`, `@supabase/supabase-js`, `@playwright/test` and `@clerk/testing` are approved. Ask before adding anything else.
+- Stay on free tiers. Don't add anything that needs a payment method.
+- `npm run build` and `npm run lint` must pass before each commit.
