@@ -12,12 +12,14 @@ const browserHasPasskeys = () => typeof window.PublicKeyCredential !== "undefine
 // passkey so later sign-ins are just Face ID, Touch ID or a fingerprint.
 // Clerk's own "Add passkey" is three clicks deep in the account menu, so this
 // offers it at the top of the page to anyone signed in without one. "Not now"
-// is remembered on the Clerk user, so it stays dismissed on every device.
+// hides it for this visit only: it's back after a reload or the next sign-in,
+// until you add a passkey.
 export function PasskeyPrompt() {
   const { isLoaded, user } = useUser();
   const supported = useSyncExternalStore(noSubscribe, browserHasPasskeys, () => false);
   const [busy, setBusy] = useState(false);
   const [added, setAdded] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (added) {
@@ -33,8 +35,7 @@ export function PasskeyPrompt() {
     );
   }
 
-  if (!isLoaded || !user || !supported) return null;
-  if (user.passkeys.length > 0 || user.unsafeMetadata.passkeyPromptDismissed) return null;
+  if (!isLoaded || !user || !supported || dismissed || user.passkeys.length > 0) return null;
 
   async function addPasskey() {
     setBusy(true);
@@ -55,10 +56,6 @@ export function PasskeyPrompt() {
     }
   }
 
-  async function notNow() {
-    await user!.update({ unsafeMetadata: { ...user!.unsafeMetadata, passkeyPromptDismissed: true } });
-  }
-
   return (
     <div className="mb-6">
       <Banner tone="accent" title="Skip the email code next time">
@@ -72,7 +69,7 @@ export function PasskeyPrompt() {
           <Button onClick={addPasskey} disabled={busy}>
             {busy ? "Waiting for your device…" : "Add a passkey"}
           </Button>
-          <Button variant="quiet" onClick={notNow} disabled={busy}>
+          <Button variant="quiet" onClick={() => setDismissed(true)} disabled={busy}>
             Not now
           </Button>
         </div>

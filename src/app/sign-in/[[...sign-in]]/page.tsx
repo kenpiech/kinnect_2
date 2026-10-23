@@ -1,12 +1,14 @@
 import { SignIn } from "@clerk/nextjs";
 import { Suspense } from "react";
+import { PasskeySignIn } from "@/components/PasskeySignIn";
 
-// Clerk's catch-all sign-in page. It reads the URL at request time, so it sits
-// in Suspense for cacheComponents builds.
+// Passkey first, email code second. Both read the URL at request time, so they
+// sit in Suspense for cacheComponents builds.
 export default function SignInPage() {
   return (
-    <div className="flex justify-center">
+    <div className="grid justify-items-center gap-4">
       <Suspense>
+        <PasskeySignIn />
         <SignIn />
       </Suspense>
     </div>

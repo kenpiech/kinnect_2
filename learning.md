@@ -144,3 +144,8 @@ I wanted sign-in to be super simple and secure: never a password, just Face ID o
 **App change:** `PasskeyPrompt` shows a banner to signed-in users with no passkey on a browser that supports them. It calls Clerk's `user.createPasskey()`, ignores a cancelled Face ID sheet, explains other errors, and remembers "Not now" on the Clerk user.
 
 **Caught:** `clerk config pull` showed first and last name were *enabled but not required*, even though the plan said to require them.
+
+**Follow-up: passkeys "every time."**
+- The **"Add a passkey" banner** now comes back on every visit until you add one. "Not now" hides it for that visit only (it used to hide it forever).
+- **The sign-in page leads with a big "Sign in with passkey" button**, with Clerk's email-code form below it as the fallback. Browsers (Safari especially) won't open the Face ID sheet unless the person taps something, so one tap plus Face ID is the fastest sign-in a page can offer. Clerk's form also offers your passkey as an autofill suggestion.
+- **Security detail:** after a passkey sign-in, the app returns you to the page you were bounced from (`redirect_url`), but only if that URL is on Kinnect itself. Otherwise a crafted link could send someone to another site right after they sign in (an "open redirect").
