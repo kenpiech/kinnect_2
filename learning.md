@@ -90,7 +90,7 @@ Deny rule in `.claude/settings.json`: `{"permissions": {"deny": ["Read(./.env)",
 
 **Ask:** "Explain why this deny rule protects my keys. Then explain the difference between my publishable and secret keys, and where each one is allowed to go."
 
-- **Why it protects them:** whatever the agent reads enters the conversation, which is sent to the model provider, may be logged, and can leak into commits or output. The rule makes Claude Code itself block the agent's file-reading tool on `.env` and `.env.*`, before the request reaches the model. Without reading, the agent can't edit the file either, so I create `.env.local` myself.
+- **Why it protects them:** whatever the agent reads enters the conversation, which is sent to the model provider, may be logged, and can leak into commits or output. The rule makes Claude Code itself block the agent's file-reading tool on `.env` and `.env.*`, before the request reaches the model. It blocks **reading only**. Editing and creating files are separate permissions, so the project rule now denies `Edit` too, and I create `.env.local` myself.
 - **Layers:** the deny rule (away from the agent), `.gitignore` `.env*` (away from GitHub), `process.env` (away from source code), and no `NEXT_PUBLIC_` prefix on secrets (away from the browser).
 - **Publishable keys say who the app is.** They're visible in the browser to anyone, and on their own they can only do what Clerk sign-in and Supabase RLS allow.
 - **Secret keys grant power.** Holding one makes you the server.
@@ -104,4 +104,4 @@ Deny rule in `.claude/settings.json`: `{"permissions": {"deny": ["Read(./.env)",
 
 **In class:** a key on its own unlocks nothing in Kinnect. The anonymous role has no RLS policies. Access comes from the signed, short-lived **Clerk session token**: Supabase checks its signature, reads my user ID, and RLS shows me only my rows.
 
-**Caught:** the spec says the deny rule blocks the agent from writing `.env.local` too. It denies **Read**, which blocks *editing* (editing requires reading), but it doesn't explicitly cover *creating* the file. Adding `Edit(./.env)` and `Edit(./.env.*)` denies closes that gap.
+**Caught:** the spec says the deny rule blocks the agent from writing `.env.local` too, and my agent first claimed a Read deny also blocks editing. It doesn't: Read and Edit are separate permissions. I added `Edit(./.env)` and `Edit(./.env.*)` denies to `.claude/settings.json` so the agent can neither read nor write env files.
