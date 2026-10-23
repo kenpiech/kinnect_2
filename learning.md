@@ -83,3 +83,25 @@ erDiagram
 1. One ID ties it all together. Clerk issues it, Supabase reads it from the token (`auth.jwt()->>'sub'`), and every row carries it.
 2. `friendships` is the only table that unlocks anything. An *accepted* row lets you read another person's posts.
 3. The library never unlocks for anyone else, so a post carries a **copy** of the book's title and author.
+
+## Step 3 · Protect the keys
+
+Deny rule in `.claude/settings.json`: `{"permissions": {"deny": ["Read(./.env)", "Read(./.env.*)"]}}`. I had already put the same rule in my user-wide `~/.claude/settings.json`. The project copy is what's committed, so it travels with the repo.
+
+**Ask:** "Explain why this deny rule protects my keys. Then explain the difference between my publishable and secret keys, and where each one is allowed to go."
+
+- **Why it protects them:** whatever the agent reads enters the conversation, which is sent to the model provider, may be logged, and can leak into commits or output. The rule makes Claude Code itself block the agent's file-reading tool on `.env` and `.env.*`, before the request reaches the model. Without reading, the agent can't edit the file either, so I create `.env.local` myself.
+- **Layers:** the deny rule (away from the agent), `.gitignore` `.env*` (away from GitHub), `process.env` (away from source code), and no `NEXT_PUBLIC_` prefix on secrets (away from the browser).
+- **Publishable keys say who the app is.** They're visible in the browser to anyone, and on their own they can only do what Clerk sign-in and Supabase RLS allow.
+- **Secret keys grant power.** Holding one makes you the server.
+
+| Key | Browser | `.env.local` | Vercel | Code / Git / chat |
+|---|---|---|---|---|
+| Clerk publishable `pk_test_…` | yes | yes | yes | no |
+| Supabase URL and publishable key | yes | yes | yes | no |
+| Clerk secret `sk_test_…` | **never** | yes | yes | **never** |
+| Supabase secret `sb_secret_…` | no | no | no | no. Not used in Kinnect (it bypasses RLS). |
+
+**In class:** a key on its own unlocks nothing in Kinnect. The anonymous role has no RLS policies. Access comes from the signed, short-lived **Clerk session token**: Supabase checks its signature, reads my user ID, and RLS shows me only my rows.
+
+**Caught:** the spec says the deny rule blocks the agent from writing `.env.local` too. It denies **Read**, which blocks *editing* (editing requires reading), but it doesn't explicitly cover *creating* the file. Adding `Edit(./.env)` and `Edit(./.env.*)` denies closes that gap.
