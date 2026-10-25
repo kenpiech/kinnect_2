@@ -1,0 +1,31 @@
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { People } from "@/components/People";
+import { Banner, PageHeader } from "@/components/ui";
+import { getPeople } from "@/lib/data";
+
+export const metadata: Metadata = { title: "People · Kinnect" };
+
+export default function PeoplePage() {
+  return (
+    <div className="grid gap-8">
+      <PageHeader title="People">Classmates on Kinnect. Friends see each other&apos;s posts.</PageHeader>
+      {/* Who's connected to you depends on who's asking, so it loads at request time */}
+      <Suspense fallback={<p className="text-muted">Finding people…</p>}>
+        <PeopleList />
+      </Suspense>
+    </div>
+  );
+}
+
+async function PeopleList() {
+  const people = await getPeople();
+  if (!people) {
+    return (
+      <Banner tone="accent" title="Couldn't load people">
+        Kinnect couldn&apos;t reach its database. Reload the page to try again.
+      </Banner>
+    );
+  }
+  return <People people={people} />;
+}

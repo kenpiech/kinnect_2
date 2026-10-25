@@ -84,7 +84,7 @@ export default function Feed() {
               <PersonCard key={person.handle} person={person} onAdd={() => quickAdd(person.handle)} />
             ))}
           </ul>
-          <TextLink href="/friends/add" className="mt-3 justify-self-start">
+          <TextLink href="/people" className="mt-3 justify-self-start">
             See everyone
           </TextLink>
         </section>
@@ -122,7 +122,7 @@ export default function Feed() {
         ))}
         <p className="py-8 text-center italic text-muted">
           You&rsquo;re all caught up.{" "}
-          <TextLink href="/friends/add" className="not-italic">
+          <TextLink href="/people" className="not-italic">
             Add more friends
           </TextLink>
         </p>

@@ -74,3 +74,63 @@ export async function removeBook(id: string): Promise<ActionResult> {
   refresh();
   return { ok: true };
 }
+
+const CLERK_USER_ID = /^user_[A-Za-z0-9]+$/;
+
+export async function sendFriendRequest(addresseeId: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof addresseeId !== "string" || !CLERK_USER_ID.test(addresseeId) || addresseeId === userId) {
+    return { ok: false, error: "Couldn't find that person. Reload and retry." };
+  }
+  const db = await supabase();
+  // requester_id and status fill themselves in (me, pending), and the
+  // "send a friend request" policy checks both
+  let { error } = await db.from("friendships").insert({ addressee_id: addresseeId });
+  // 23503 on your side: no profile yet, so make it and retry once
+  if (error?.code === "23503") {
+    await ensureProfile();
+    ({ error } = await db.from("friendships").insert({ addressee_id: addresseeId }));
+  }
+  if (error?.code === "23505") return { ok: false, error: "You two are already connected, or one of you has asked. Reload to see." };
+  if (error) {
+    console.error("Couldn't send request:", error.message);
+    return { ok: false, error: "Couldn't send the request. Try again." };
+  }
+  refresh();
+  return { ok: true };
+}
+
+export async function acceptFriendRequest(friendshipId: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof friendshipId !== "string" || !UUID.test(friendshipId)) return { ok: false, error: "Couldn't find that request. Reload and retry." };
+
+  const db = await supabase();
+  // Only status can be updated, and the "accept a request sent to me" policy
+  // only matches pending requests where I'm the addressee
+  const { data, error } = await db.from("friendships").update({ status: "accepted" }).eq("id", friendshipId).select("id");
+  if (error) {
+    console.error("Couldn't accept request:", error.message);
+    return { ok: false, error: "Couldn't accept it. Try again." };
+  }
+  if (data.length === 0) return { ok: false, error: "That request is gone. It may have been cancelled." };
+  refresh();
+  return { ok: true };
+}
+
+// Decline, cancel and unfriend are all the same thing: the row goes away
+export async function removeFriendship(friendshipId: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof friendshipId !== "string" || !UUID.test(friendshipId)) return { ok: false, error: "Couldn't find that. Reload and retry." };
+
+  const db = await supabase();
+  const { error } = await db.from("friendships").delete().eq("id", friendshipId);
+  if (error) {
+    console.error("Couldn't remove friendship:", error.message);
+    return { ok: false, error: "Couldn't do that. Try again." };
+  }
+  refresh();
+  return { ok: true };
+}
