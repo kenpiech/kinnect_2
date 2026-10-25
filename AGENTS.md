@@ -8,11 +8,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# lib2
+# Kinnect
 
-A small social network for classmates who read: save books to your library, add friends, and post about what you're reading. Always written in lowercase: **lib2**. Live at **https://lib-2-app.vercel.app** (Vercel production tracks `full-stack` until the merge, then `main`). Version 2 of Assignment 3, "Kinnect" (a localStorage-only prototype). The repo is still `kinnect_2`, and the A3 localStorage key is still `kinnect:v1`.
+**A social app with a reading tool, not a reading app with social features.** A small social network for classmates: add friends, post, like and comment, and keep a private library of books you can mention in a post. Written **Kinnect**. Copy leads with the social side; books are the built-in tool. Live at **https://lib-2-app.vercel.app** (the address is from when the app was briefly called "lib2"; Vercel production tracks `full-stack` until the merge, then `main`). Version 2 of Assignment 3's Kinnect (a localStorage-only prototype). The repo is `kinnect_2`. Browser keys are `kinnect:draft` and `kinnect:flash`. The test readers' emails still say `lib2-`, because they're existing Clerk accounts.
 
-**The rule everything follows: your library is private, and your posts are shared with your friends.**
+**The rule everything follows: your posts are shared with your friends, and your library is private.**
 
 ## Stack
 - Next.js 16 and Tailwind CSS
@@ -27,7 +27,7 @@ A small social network for classmates who read: save books to your library, add 
 - **Signed out, you see nothing real.** Every route except `/` and the Clerk sign-in/sign-up pages requires a session. Signed-out pages redirect to sign-in, and `/api/*` answers `401` JSON (from `src/proxy.ts`, and checked again in each handler).
 - **Library tab:** search Open Library and save books. Your library is private, even from friends.
 - **People tab:** list and search other users. Request, Accept and Remove (Remove also covers decline, cancel and unfriend).
-- **Posts:** up to 280 characters, optionally about one book from your library. Your feed shows your posts and your accepted friends' posts, newest first.
+- **Posts** ("What's on your mind?"): up to 280 characters, optionally about one book from your library. Your feed shows your posts and your accepted friends' posts, newest first.
 - **Likes and comments** (`src/components/PostFooter.tsx`): one like per person per post (optimistic heart), and comments up to 280 characters, oldest first. You can delete your own comment, and a post's author can delete any comment on it. A comment is visible to everyone who can see the post, and the comment box says so.
 - **Tabs:** Feed · Library · People · Me.
 - **Avatars are required.** Everyone picks one of 19 drawn avatars (13 readers plus a ninja, wizard, viking, detective, pilot and polar bear) (`public/avatars/readers`, drawn by `scripts/reader_avatars.py`; keys in `src/lib/avatars.ts` and the `profiles.avatar` check). Until they do, `ProfileSync` shows `AvatarGate`, a modal `<dialog>` that Escape can't close. They can change it on Me. Avatars show on posts, People and Me. Initials are only a fallback.
@@ -49,7 +49,7 @@ Six tables in Supabase. Every ID that names a person is a **Clerk user ID** (`te
 - **A profile is created on first sign-in** (an upsert from the Clerk name). No webhook.
 - **RLS is on for every table, and the `anon` role has no policies.** Never turn RLS off, never add a `using (true)` read policy (except the deliberate test break, which is reverted), and never use the Supabase secret/service-role key in the app.
 - **Grants come first.** "Automatically expose new tables" is off, so a new table has no access until a migration grants it. Grant only what the app uses, only to `authenticated`, and never to `anon`, even when a Postgres error hint suggests it. Updates are granted per column (`profiles.display_name`, `profiles.avatar`, `friendships.status`) so that accepting a request can't also rewrite who sent it.
-- **Only lib2's Clerk tokens count.** Every table has a restrictive policy requiring `iss` = `https://holy-gelding-7096.clerk.accounts.dev`, because Supabase also trusts its own built-in sign-in. A new table needs the same policy.
+- **Only Kinnect's Clerk tokens count.** Every table has a restrictive policy requiring `iss` = `https://holy-gelding-7096.clerk.accounts.dev`, because Supabase also trusts its own built-in sign-in. A new table needs the same policy.
 - **App queries rely on RLS.** Don't add `.eq('user_id', …)` filters that duplicate a policy. The Playwright test proves RLS works, and redundant filters would hide a broken policy.
 - Schema changes are **migrations** applied through the Supabase MCP server, with a copy of each saved in `supabase/migrations/`, never edits in the dashboard. After each one, run the security and performance advisors. The `auth_rls_initplan` warnings are false positives: our `(select auth.jwt()->>'sub')` form already runs once per query.
 

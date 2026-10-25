@@ -7,10 +7,10 @@ import { Avatar, Banner, PageHeader, TextLink } from "@/components/ui";
 import { getMe } from "@/lib/data";
 import { plural } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Me · lib2" };
+export const metadata: Metadata = { title: "Me · Kinnect" };
 
 // You: your name, your posts, and signing out. Everything here is stored in
-// lib2's database, so it's the same on any device you sign in on.
+// Kinnect's database, so it's the same on any device you sign in on.
 export default function MePage() {
   return (
     <div className="grid gap-10">
@@ -29,7 +29,7 @@ async function Me() {
       <>
         <PageHeader title="Me" />
         <Banner tone="accent" title="Couldn't load your page">
-          lib2 couldn&apos;t reach its database. Reload the page to try again.
+          Kinnect couldn&apos;t reach its database. Reload the page to try again.
         </Banner>
       </>
     );

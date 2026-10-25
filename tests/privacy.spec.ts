@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { escape, pickAvatarIfAsked, signIn } from "./helpers";
 import { READERS } from "./readers";
 
-// The rule lib2 follows: your library is private, and your posts are shared
+// The rule Kinnect follows: your library is private, and your posts are shared
 // with your friends. Reader A and Reader B are not friends, so B must see
 // neither A's post nor A's book.
 //
@@ -30,7 +30,7 @@ test("two readers who aren't friends can't see each other's posts or books", asy
   await expect(library(a)).toContainText(title);
 
   await a.goto("/post/new");
-  await a.getByLabel("What are you reading?").fill(secret);
+  await a.getByLabel("What's on your mind?").fill(secret);
   await a.getByRole("radio", { name: new RegExp(escape(title)) }).check();
   await a.getByRole("button", { name: "Post about this book" }).click();
   await a.waitForURL("**/feed");
@@ -41,7 +41,7 @@ test("two readers who aren't friends can't see each other's posts or books", asy
     const b = await signIn(browser, READERS.b.email);
     await b.goto("/feed");
     await pickAvatarIfAsked(b);
-    await expect(b.getByText("What are you reading?")).toBeVisible();
+    await expect(b.getByText("What's on your mind?")).toBeVisible();
     await expect(b.getByText(secret), "B must not see A's post").toHaveCount(0);
 
     await b.goto("/library");

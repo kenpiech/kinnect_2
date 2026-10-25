@@ -4,7 +4,7 @@ import { Library } from "@/components/Library";
 import { Banner, PageHeader } from "@/components/ui";
 import { getLibrary } from "@/lib/data";
 
-export const metadata: Metadata = { title: "Library · lib2" };
+export const metadata: Metadata = { title: "Library · Kinnect" };
 
 export default function LibraryPage() {
   return (
@@ -23,7 +23,7 @@ async function SavedLibrary() {
   if (!items) {
     return (
       <Banner tone="accent" title="Couldn't open your library">
-        lib2 couldn&apos;t reach its database. Reload the page to try again.
+        Kinnect couldn&apos;t reach its database. Reload the page to try again.
       </Banner>
     );
   }

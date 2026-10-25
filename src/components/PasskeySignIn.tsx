@@ -9,7 +9,7 @@ const noSubscribe = () => () => {};
 const browserHasPasskeys = () => typeof window.PublicKeyCredential !== "undefined";
 
 // Where to go after signing in: the page the proxy bounced you from, but only
-// if it's on lib2 itself, so a crafted link can't send you to another site.
+// if it's on Kinnect itself, so a crafted link can't send you to another site.
 function safeDestination(redirectUrl: string | null) {
   if (!redirectUrl) return "/feed";
   try {
@@ -41,7 +41,7 @@ export function PasskeySignIn() {
       setBusy(false);
       // Closing the Face ID sheet isn't an error worth a message
       if (error.code === "passkey_retrieval_cancelled" || error.code === "passkey_operation_aborted") return;
-      setError("That didn't work. If this device has no lib2 passkey yet, sign in with an email code below.");
+      setError("That didn't work. If this device has no Kinnect passkey yet, sign in with an email code below.");
       return;
     }
     if (signIn.status !== "complete") {

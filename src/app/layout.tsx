@@ -12,11 +12,11 @@ const literata = Literata({ subsets: ["latin"], style: ["normal", "italic"], var
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#f3eddf", colorScheme: "light" };
 
 export const metadata: Metadata = {
-  title: "lib2",
-  description: "Add friends and read what they post. Text only.",
+  title: "Kinnect",
+  description: "A small social network for your class, with a private reading library.",
 };
 
-// Clerk's sign-in and account screens in lib2's paper, ink and oxblood
+// Clerk's sign-in and account screens in Kinnect's paper, ink and oxblood
 const clerkAppearance = {
   variables: {
     colorPrimary: "#8b2e1f",
@@ -50,7 +50,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </main>
           <footer className="border-t border-rule">
             <p className="mx-auto max-w-2xl px-4 py-4 text-[15px] italic text-muted">
-              Your library is private. Your posts are for your friends.
+              Your posts are for your friends. Your library is private.
             </p>
           </footer>
           <Suspense>

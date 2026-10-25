@@ -1,4 +1,4 @@
-// A book as lib2 uses it, shared by the server (the /api/books proxy and
+// A book as Kinnect uses it, shared by the server (the /api/books proxy and
 // saveBook) and the browser (the Library page). Only the title is certain:
 // Open Library leaves out the author, cover or year for many works, and the
 // year is sometimes wrong, so nothing depends on them.

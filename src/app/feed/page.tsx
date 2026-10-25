@@ -7,7 +7,7 @@ import { Banner, ButtonLink, PageHeader, TextLink } from "@/components/ui";
 import { getFeed } from "@/lib/data";
 import { plural } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Feed · lib2" };
+export const metadata: Metadata = { title: "Feed · Kinnect" };
 
 // The main screen: your posts and your friends' posts, newest first. No
 // algorithm. It's never a blank page: with nothing to show, it points you to
@@ -31,7 +31,7 @@ async function Feed() {
       <>
         <PageHeader title="Your feed" />
         <Banner tone="accent" title="Couldn't load your feed">
-          lib2 couldn&apos;t reach its database. Reload the page to try again.
+          Kinnect couldn&apos;t reach its database. Reload the page to try again.
         </Banner>
       </>
     );
@@ -49,8 +49,8 @@ async function Feed() {
         className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-4 hover:bg-hover"
       >
         <span className="min-w-0 flex-1">
-          <span className="block font-semibold">What are you reading?</span>
-          <span className="block text-[15px] text-muted">Write a post, and add a book from your library if you like.</span>
+          <span className="block font-semibold">What&apos;s on your mind?</span>
+          <span className="block text-[15px] text-muted">Write a post for your friends. Mention a book from your library if you like.</span>
         </span>
         <span aria-hidden="true" className="text-xl text-accent">
           →

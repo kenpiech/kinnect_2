@@ -1,12 +1,12 @@
 import { useSyncExternalStore } from "react";
 
-// The only things lib2 keeps in the browser: the post you're still writing,
+// The only things Kinnect keeps in the browser: the post you're still writing,
 // so leaving Write doesn't lose it, and a one-time message for the next page
 // ("Posted…"). Everything else lives in Supabase. Storage can be blocked
 // (private browsing), so every read and write is allowed to fail quietly.
 
-const DRAFT = "lib2:draft";
-const FLASH = "lib2:flash";
+const DRAFT = "kinnect:draft";
+const FLASH = "kinnect:flash";
 const listeners = new Set<() => void>();
 
 function read(store: Storage | undefined, key: string) {

@@ -1,6 +1,6 @@
 // Three made-up posts for the signed-out landing page, by three of the sample
 // characters from Assignment 3 (their portraits are in public/avatars). They
-// show what lib2 looks like before you have an account. They're labelled as
+// show what Kinnect looks like before you have an account. They're labelled as
 // samples on the page and never appear anywhere else.
 
 export type SamplePost = {
@@ -8,7 +8,7 @@ export type SamplePost = {
   name: string;
   when: string;
   text: string;
-  book: { title: string; author: string };
+  book?: { title: string; author: string };
 };
 
 export const samplePosts: SamplePost[] = [
@@ -23,8 +23,7 @@ export const samplePosts: SamplePost[] = [
     handle: "milemarker",
     name: "Rosa Delgado",
     when: "yesterday",
-    text: "Finished it on the treadmill, which is either very fitting or very sad.",
-    book: { title: "Born to Run", author: "Christopher McDougall" },
+    text: "Ran the lakefront path before seminar. 6 miles, one very judgmental goose. Who's in for Saturday?",
   },
   {
     handle: "dm_rolls",

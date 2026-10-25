@@ -1,7 +1,7 @@
 import { Avatar, ButtonLink } from "@/components/ui";
 import { samplePosts } from "@/data/samples";
 
-// The signed-out front door: what lib2 is, how it works, and three sample
+// The signed-out front door: what Kinnect is, how it works, and three sample
 // posts so it isn't an empty promise. Static, with no one's real data.
 // Signed-in visitors never see it: src/proxy.ts sends them to /feed.
 export default function Landing() {
@@ -9,11 +9,11 @@ export default function Landing() {
     <div className="grid gap-12">
       <section className="grid gap-4">
         <h1 tabIndex={-1} className="text-[2rem] font-semibold leading-tight tracking-tight outline-offset-4 sm:text-5xl">
-          Read with your classmates.
+          Keep up with your classmates.
         </h1>
         <p className="text-muted sm:text-lg">
-          lib2 is a small, quiet social network for people who read. Save books, add classmates as friends, and post about
-          what you&apos;re reading. No photos, no algorithm, newest first.
+          Kinnect is a small, quiet social network for your class. Add classmates as friends, post what&apos;s on your mind, and
+          keep a private library of the books you&apos;re reading. No photos, no algorithm, newest first.
         </p>
         <div className="flex flex-wrap gap-3">
           <ButtonLink href="/sign-up">Sign up</ButtonLink>
@@ -30,9 +30,9 @@ export default function Landing() {
         </h2>
         <ol className="grid gap-4">
           {[
-            ["Find books", "Search millions of books from Open Library and save the ones you love. Your library is private."],
             ["Add classmates", "Send a friend request. Once they accept, you see each other's posts."],
-            ["Post about a book", "Up to 280 characters, with a book from your library if you like. Only your friends see it."],
+            ["Post, like and comment", "Up to 280 characters. Only your friends see your posts, and only they can like and comment."],
+            ["Keep a library", "Search millions of books from Open Library and save the ones you love. Your library is private, and you can mention a book in a post."],
           ].map(([title, body], i) => (
             <li key={title} className="flex gap-4">
               <span
@@ -63,18 +63,20 @@ export default function Landing() {
                 <span className="text-muted">· {post.when}</span>
               </p>
               <p className="mt-1.5 text-[18px] leading-relaxed">{post.text}</p>
-              <p className="mt-3 border-l-2 border-accent pl-3 text-[15px] leading-snug">
-                <span className="text-muted">About </span>
-                <cite className="font-semibold not-italic">{post.book.title}</cite>
-                <span className="text-muted"> by {post.book.author}</span>
-              </p>
+              {post.book && (
+                <p className="mt-3 border-l-2 border-accent pl-3 text-[15px] leading-snug">
+                  <span className="text-muted">About </span>
+                  <cite className="font-semibold not-italic">{post.book.title}</cite>
+                  <span className="text-muted"> by {post.book.author}</span>
+                </p>
+              )}
             </div>
           </article>
         ))}
       </section>
 
       <section className="grid justify-items-start gap-3 rounded-2xl border border-line bg-surface p-5">
-        <p className="text-xl font-semibold tracking-tight">Your library is private. Your posts are for your friends.</p>
+        <p className="text-xl font-semibold tracking-tight">Your posts are for your friends. Your library is private.</p>
         <ButtonLink href="/sign-up">Make an account</ButtonLink>
       </section>
     </div>

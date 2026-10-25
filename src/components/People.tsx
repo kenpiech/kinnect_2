@@ -5,7 +5,7 @@ import { acceptFriendRequest, removeFriendship, sendFriendRequest, type ActionRe
 import type { Person } from "@/lib/data";
 import { Avatar, Button, Field, Toast, plural, useToast } from "./ui";
 
-// The People tab: everyone on lib2, grouped by how they're connected to
+// The People tab: everyone on Kinnect, grouped by how they're connected to
 // you. Requests for you come first, since they're waiting on you. A request
 // only counts once the other person accepts; until then neither of you sees
 // the other's posts. Remove covers decline, cancel and unfriend.
@@ -45,7 +45,7 @@ export function People({ people }: { people: Person[] }) {
       <div className="rounded-2xl border border-dashed border-line p-5">
         <p className="font-bold">You&apos;re the first one here</p>
         <p className="mt-1 text-muted">
-          Send a classmate the link to lib2. Once they sign up, they&apos;ll show up here and you can add each other.
+          Send a classmate the link to Kinnect. Once they sign up, they&apos;ll show up here and you can add each other.
         </p>
       </div>
     );

@@ -4,7 +4,7 @@ import { Composer } from "@/components/Composer";
 import { PageHeader, TextLink } from "@/components/ui";
 import { getLibrary } from "@/lib/data";
 
-export const metadata: Metadata = { title: "Write · lib2" };
+export const metadata: Metadata = { title: "Write · Kinnect" };
 
 // Write a post. "Post about it" in the Library opens this page with
 // ?book=/works/OL…W, and that book starts out picked.

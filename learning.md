@@ -389,3 +389,15 @@ The policy was loose for under a minute. After restoring, Postgres confirmed the
 - **The heart lies for a moment, on purpose.** It turns red the instant you tap, before the server has saved anything (an "optimistic" update). The test reloaded right after tapping and sometimes cut off the save. A person tapping and leaving immediately could do the same, which is acceptable for a like. The test now waits for the server's reply.
 - **Supabase couldn't tell which link to follow.** `post_likes` connects posts to profiles a second way ("people who liked it"), so asking for a post's `profiles` became ambiguous. The query names the link: `profiles!posts_user_id_fkey`.
 - The Supabase MCP server refused my test block when it contained `delete`/`update` statements, with "Invalid or expired requestState". It looks like a confirmation step that never reached the user. I didn't try to get around it: the delete rules are covered by the browser test instead (the author removing a comment, B taking back a like).
+
+## Renamed back: lib2 → Kinnect
+
+**My call:** "I'd rather have a social app with a reading tool than a reading app with social features." So the name went back to Kinnect, and the copy now leads with the social side:
+- The landing page says "Keep up with your classmates". "How it works" goes add classmates → post, like and comment → keep a library. One of the three sample posts isn't about a book at all.
+- The post box asks "What's on your mind?" instead of "What are you reading?". The footer leads with "Your posts are for your friends."
+- The logo, page titles, messages, Open Library User-Agent, package name and browser storage keys all say Kinnect again.
+
+**Left alone on purpose:**
+- The test readers' emails (`lib2-reader-…`), because they're existing Clerk accounts.
+- Migrations already applied, the saved test evidence, and the history above.
+- The live address `lib-2-app.vercel.app`, because a passkey only works on the address it was made on. Moving to a Kinnect address is my decision to make.

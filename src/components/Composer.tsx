@@ -64,7 +64,7 @@ export function Composer({
       <Field
         ref={box}
         multiline
-        label="What are you reading?"
+        label="What's on your mind?"
         hint={text.trim() ? "Draft saved on this device." : undefined}
         error={error}
         value={text}
@@ -72,7 +72,7 @@ export function Composer({
           setDraft(e.target.value);
           if (error) setError(undefined);
         }}
-        placeholder="Halfway through and I can't put it down."
+        placeholder="Study group at 7? Halfway through a book I can't put down?"
         autoFocus={!initialBook}
         aside={
           <span aria-live="polite" className={`text-[14px] ${left < 0 ? "font-semibold text-danger" : "text-muted"}`}>

@@ -39,7 +39,7 @@ test("a friend can like and comment, and the author can remove the comment", asy
 
     // A posts
     await a.goto("/post/new");
-    await a.getByLabel("What are you reading?").fill(postText);
+    await a.getByLabel("What's on your mind?").fill(postText);
     await a.getByRole("button", { name: "Post", exact: true }).click();
     await a.waitForURL("**/feed");
 

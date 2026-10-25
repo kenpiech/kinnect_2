@@ -1,4 +1,4 @@
-"""Draws the avatars people pick from in lib2, as SVGs in public/avatars/readers.
+"""Draws the avatars people pick from in Kinnect, as SVGs in public/avatars/readers.
 
 Same parts and style as the sample friends in avatars.py (and the same
 blinking, which stops for reduce-motion), but everyday readers instead of
