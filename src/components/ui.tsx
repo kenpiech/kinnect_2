@@ -181,9 +181,8 @@ export function useToast() {
   return [message, show, hide] as const;
 }
 
-export function plural(n: number, word: string) {
-  return `${n} ${word}${n === 1 ? "" : "s"}`;
-}
+// Lives in src/lib/format.ts so server components can call it too
+export { plural } from "@/lib/format";
 
 export function PageHeader({ title, children }: { title: string; children?: React.ReactNode }) {
   return (

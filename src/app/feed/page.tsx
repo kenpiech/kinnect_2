@@ -3,8 +3,9 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Flash } from "@/components/Flash";
 import { PostItem } from "@/components/posts";
-import { Banner, ButtonLink, PageHeader, TextLink, plural } from "@/components/ui";
+import { Banner, ButtonLink, PageHeader, TextLink } from "@/components/ui";
 import { getFeed } from "@/lib/data";
+import { plural } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Feed · lib2" };
 
