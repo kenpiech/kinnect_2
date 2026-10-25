@@ -59,7 +59,7 @@ export type Person = {
   friendshipId: string | null;
 };
 
-// Everyone on Kinnect but you, with how each of them is connected to you.
+// Everyone on lib2 but you, with how each of them is connected to you.
 // Profiles are readable by anyone signed in; friendships come back only when
 // you're one of the two people, thanks to "read my friendships". Null means
 // Supabase couldn't be reached.

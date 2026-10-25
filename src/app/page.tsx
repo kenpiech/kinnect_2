@@ -7,7 +7,7 @@ import { Button, ButtonLink, Toast, plural, useToast } from "@/components/ui";
 import { people, personByHandle } from "@/data/people";
 import { addAllFriends, addFriend, feed, livePosts, useNow, useStore } from "@/lib/store";
 
-// The first visit. No sign-up and no empty screen: a line on what Kinnect is,
+// The first visit. No sign-up and no empty screen: a line on what lib2 is,
 // a few real posts, and people you can add with one tap.
 export default function Welcome() {
   const s = useStore();
@@ -49,13 +49,13 @@ export default function Welcome() {
           See what your friends are up to.
         </h1>
         <p className="text-muted sm:text-lg">
-          Kinnect is a feed of short text posts from people you choose. No photos, no algorithm, newest first.
+          lib2 is a feed of short text posts from people you choose. No photos, no algorithm, newest first.
         </p>
       </section>
 
       <section aria-labelledby="now" className="grid gap-1">
         <h2 id="now" className="label border-b border-rule pb-2 text-muted">
-          On Kinnect right now
+          On lib2 right now
         </h2>
         {preview.map((post) => (
           <PostCard key={post.id} post={post} myName={s.name} now={now} />

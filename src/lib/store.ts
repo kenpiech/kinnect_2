@@ -3,7 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { people, personByHandle, seedPosts, type SeedPost } from "@/data/people";
 
-// The only code that touches localStorage. Everything Kinnect remembers lives
+// The only code that touches localStorage. Everything lib2 remembers lives
 // under one versioned key, so a real database can replace this file later
 // without the pages changing.
 
@@ -15,14 +15,14 @@ export const FAST_SPEED = DAY / 20_000;
 
 export type MyPost = { id: string; text: string; createdAt: number };
 
-// Kinnect keeps its own clock so it can fast-forward for testing. Sample time
+// lib2 keeps its own clock so it can fast-forward for testing. Sample time
 // = anchorSample + (real time since anchorReal) × speed. At speed 1 it's just
 // the real time. Every timestamp saved below is in sample time.
 export type Clock = { anchorReal: number; anchorSample: number; speed: number };
 
 export type State = {
   firstVisit: number | null;
-  // When you last left Kinnect, and when you left it before this visit
+  // When you last left lib2, and when you left it before this visit
   lastSeen: number | null;
   previousVisit: number | null;
   name: string;
@@ -114,7 +114,7 @@ export function isStorageOk() {
   return storageOk;
 }
 
-// The current time on Kinnect's clock.
+// The current time on lib2's clock.
 export function sampleNow(s: State = state) {
   return s.clock.anchorSample + (Date.now() - s.clock.anchorReal) * s.clock.speed;
 }
@@ -138,7 +138,7 @@ export function setSpeed(speed: number) {
   save({ ...state, clock: { anchorReal: Date.now(), anchorSample: sampleNow(), speed } });
 }
 
-// When this visit started, on Kinnect's clock. Posts newer than this arrived
+// When this visit started, on lib2's clock. Posts newer than this arrived
 // while you were here.
 export function sessionStartedAt() {
   return sessionStart;

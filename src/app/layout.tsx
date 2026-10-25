@@ -13,11 +13,11 @@ const literata = Literata({ subsets: ["latin"], style: ["normal", "italic"], var
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#f3eddf", colorScheme: "light" };
 
 export const metadata: Metadata = {
-  title: "Kinnect",
+  title: "lib2",
   description: "Add friends and read what they post. Text only.",
 };
 
-// Clerk's sign-in and account screens in Kinnect's paper, ink and oxblood
+// Clerk's sign-in and account screens in lib2's paper, ink and oxblood
 const clerkAppearance = {
   variables: {
     colorPrimary: "#8b2e1f",

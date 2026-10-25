@@ -8,9 +8,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Kinnect
+# lib2
 
-A small social network for classmates who read: save books to your library, add friends, and post about what you're reading. Spelled with two n's. Version 2 of Assignment 3 (which was a localStorage-only prototype).
+A small social network for classmates who read: save books to your library, add friends, and post about what you're reading. Always written in lowercase: **lib2**. Version 2 of Assignment 3, "Kinnect" (a localStorage-only prototype). The repo is still `kinnect_2`, and the A3 localStorage key is still `kinnect:v1`.
 
 **The rule everything follows: your library is private, and your posts are shared with your friends.**
 
@@ -44,7 +44,7 @@ Four tables in Supabase. Every ID that names a person is a **Clerk user ID** (`t
 - **A profile is created on first sign-in** (an upsert from the Clerk name). No webhook.
 - **RLS is on for every table, and the `anon` role has no policies.** Never turn RLS off, never add a `using (true)` read policy (except the deliberate test break, which is reverted), and never use the Supabase secret/service-role key in the app.
 - **Grants come first.** "Automatically expose new tables" is off, so a new table has no access until a migration grants it. Grant only what the app uses, only to `authenticated`, and never to `anon`, even when a Postgres error hint suggests it. Updates are granted per column (`profiles.display_name`, `friendships.status`) so that accepting a request can't also rewrite who sent it.
-- **Only Kinnect's Clerk tokens count.** Every table has a restrictive policy requiring `iss` = `https://holy-gelding-7096.clerk.accounts.dev`, because Supabase also trusts its own built-in sign-in. A new table needs the same policy.
+- **Only lib2's Clerk tokens count.** Every table has a restrictive policy requiring `iss` = `https://holy-gelding-7096.clerk.accounts.dev`, because Supabase also trusts its own built-in sign-in. A new table needs the same policy.
 - **App queries rely on RLS.** Don't add `.eq('user_id', …)` filters that duplicate a policy. The Playwright test proves RLS works, and redundant filters would hide a broken policy.
 - Schema changes are **migrations** applied through the Supabase MCP server, with a copy of each saved in `supabase/migrations/`, never edits in the dashboard. After each one, run the security and performance advisors. The `auth_rls_initplan` warnings are false positives: our `(select auth.jwt()->>'sub')` form already runs once per query.
 

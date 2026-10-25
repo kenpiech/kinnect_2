@@ -1,4 +1,4 @@
-// The sample network. Kinnect has no server yet, so these seven people and
+// The sample network. lib2 has no server yet, so these seven people and
 // their posts ship with the app. Each post goes live `dayOffset` days after
 // your first visit, at `hour` o'clock-ish (see visibleAt in lib/store.ts),
 // so there's something new when you come back. Day 0 posts are already up

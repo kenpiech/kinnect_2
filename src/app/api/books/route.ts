@@ -7,11 +7,11 @@ import type { Book } from "@/lib/books";
 //
 // The browser asks us and we ask Open Library, so there's one place for the
 // timeout, the caching and the User-Agent Open Library asks callers to send,
-// and strangers can't use Kinnect as a free search proxy. Answers:
+// and strangers can't use lib2 as a free search proxy. Answers:
 //   200 { books, total }   (an empty list is "nothing found", not an error)
 //   400 empty search       401 signed out       502 Open Library down or slow
 
-const USER_AGENT = "Kinnect/2.0 (class project; https://github.com/kenpiech/kinnect_2)";
+const USER_AGENT = "lib2/2.0 (class project; https://github.com/kenpiech/kinnect_2)";
 
 type Doc = { key?: string; title?: string; author_name?: string[]; first_publish_year?: number; cover_i?: number };
 

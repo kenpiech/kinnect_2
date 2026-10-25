@@ -46,7 +46,7 @@ export function Session() {
         </div>
       )}
       {blocked && (
-        <Banner title="This browser isn't saving Kinnect">
+        <Banner title="This browser isn't saving lib2">
           Everything works for this visit, but your friends and posts will be gone when you close the tab. Private
           browsing often causes this.
         </Banner>
