@@ -1,4 +1,4 @@
-"""Draws the 13 avatars people pick from in lib2, as SVGs in public/avatars/readers.
+"""Draws the avatars people pick from in lib2, as SVGs in public/avatars/readers.
 
 Same parts and style as the sample friends in avatars.py (and the same
 blinking, which stops for reduce-motion), but everyday readers instead of
@@ -12,6 +12,35 @@ from avatars import INK, brows, svg
 OUT = __import__("avatars").OUT / "readers"
 
 smile = f'<path d="M51 69 q9 7 18 0" fill="none" stroke="{INK}" stroke-width="2.4" stroke-linecap="round"/>'
+
+
+def polar_bear():
+    """Not a person, so not built from svg()'s parts: round ears on top, a big
+    snout and nose, the same outline weight and the same blink."""
+    fur, shade = "#f7f5f0", "#e6ded2"
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of a polar bear">
+<style>
+.eyes{{transform-origin:60px 56px;animation:blink 5.5s infinite 2.6s}}
+@keyframes blink{{0%,93%,100%{{transform:scaleY(1)}}95%{{transform:scaleY(.08)}}}}
+@media (prefers-reduced-motion:reduce){{.eyes{{animation:none}}}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#cfe3ee"/>
+<path d="M10 122 C12 94 34 84 60 84 C86 84 108 94 110 122 Z" fill="{fur}" stroke="{INK}" stroke-width="2.5"/>
+<path d="M38 88 C48 96 72 96 82 88 L84 96 C72 106 48 106 36 96 Z" fill="#c2372e" stroke="{INK}" stroke-width="2.2"/>
+<circle cx="37" cy="36" r="10" fill="{fur}" stroke="{INK}" stroke-width="2.5"/><circle cx="37" cy="36" r="5" fill="{shade}"/>
+<circle cx="83" cy="36" r="10" fill="{fur}" stroke="{INK}" stroke-width="2.5"/><circle cx="83" cy="36" r="5" fill="{shade}"/>
+<ellipse cx="60" cy="59" rx="29" ry="27" fill="{fur}" stroke="{INK}" stroke-width="2.5"/>
+<circle cx="42" cy="66" r="4.5" fill="#e8907a" opacity=".35"/><circle cx="78" cy="66" r="4.5" fill="#e8907a" opacity=".35"/>
+<g class="eyes"><ellipse cx="49" cy="55" rx="2.8" ry="3.4" fill="{INK}"/><ellipse cx="71" cy="55" rx="2.8" ry="3.4" fill="{INK}"/></g>
+<ellipse cx="60" cy="70" rx="13" ry="10" fill="{shade}" stroke="{INK}" stroke-width="2.2"/>
+<ellipse cx="60" cy="65.5" rx="5" ry="3.5" fill="{INK}"/>
+<path d="M60 69 v3 M54 74 q6 5 12 0" fill="none" stroke="{INK}" stroke-width="2.2" stroke-linecap="round"/>
+</g>
+</svg>
+"""
+
 
 readers = {
     # Round glasses, side-parted dark hair, navy sweater
@@ -199,7 +228,95 @@ readers = {
         f'<path d="M33 49 C45 45 66 45 75 49 C66 55 44 55 33 51 Z" fill="#5f513f" stroke="{INK}" stroke-width="2.2"/>'
         f'<circle cx="60" cy="29" r="2.4" fill="#5f513f"/>',
     ),
+    # Ninja: dark hood with only the eyes showing, red headband
+    "ninja": svg(
+        "a ninja",
+        bg="#cfd8e3",
+        skin="#e3ae86",
+        shirt="#26232a",
+        blink_delay=0.6,
+        eyes_extra=brows(52, tilt=2, w=3),
+        front=f'<path fill-rule="evenodd" d="M60 25 C87 25 91 48 89 64 C88 78 85 86 81 92 L39 92 C35 86 32 78 31 64 C29 48 33 25 60 25 Z M41 52 Q60 47 79 52 L79 63 Q60 68 41 63 Z" fill="#26232a" stroke="{INK}" stroke-width="2.5"/>'
+        f'<rect x="33" y="41" width="54" height="7" rx="3" fill="#c2372e" stroke="{INK}" stroke-width="2"/>'
+        f'<path d="M85 44 l15 -7 l-3 7 l13 3 l-15 4 z" fill="#c2372e" stroke="{INK}" stroke-width="2"/>',
+    ),
+    # Wizard: tall blue hat with stars, long white beard, blue robe
+    "wizard": svg(
+        "a wizard",
+        bg="#e6e0f2",
+        skin="#efcfb4",
+        shirt="#3b4f9a",
+        blink_delay=1.7,
+        eyes_extra=brows(49, color="#e9e5dc", w=3.6),
+        face_extra=f'<path d="M40 64 C38 92 50 106 60 108 C70 106 82 92 80 64 C76 74 70 76 60 76 C50 76 44 74 40 64 Z" fill="#f1eee8" stroke="{INK}" stroke-width="2.2"/>'
+        f'<path d="M48 70 C52 65 58 66 60 68 C62 66 68 65 72 70 C68 73 63 72 60 71 C57 72 52 73 48 70 Z" fill="#f1eee8" stroke="{INK}" stroke-width="2"/>',
+        mouth=f'<path d="M56 76 q4 3 8 0" fill="none" stroke="{INK}" stroke-width="2" stroke-linecap="round"/>',
+        cheeks=False,
+        front=f'<path d="M28 44 C40 37 80 37 92 44 C80 49 40 49 28 44 Z" fill="#26357a" stroke="{INK}" stroke-width="2.5"/>'
+        f'<path d="M40 43 C48 28 50 10 68 1 C62 16 72 30 80 43 Z" fill="#2f3f86" stroke="{INK}" stroke-width="2.5"/>'
+        f'<path d="M58 26 l1.5 3 3 .5 -2.2 2 .6 3 -2.9 -1.5 -2.9 1.5 .6 -3 -2.2 -2 3 -.5 z" fill="#e8c95a"/>'
+        '<circle cx="68" cy="34" r="1.8" fill="#e8c95a"/><circle cx="62" cy="14" r="1.5" fill="#e8c95a"/>',
+    ),
+    # Viking: horned helmet, braided ginger beard, fur collar
+    "viking": svg(
+        "a viking",
+        bg="#d9e2d0",
+        skin="#f0c4a0",
+        shirt="#7a5a3a",
+        blink_delay=2.2,
+        neck_extra=f'<path d="M30 96 C36 86 44 90 48 86 C52 92 58 88 60 92 C62 88 68 92 72 86 C76 90 84 86 90 96 C80 102 40 102 30 96 Z" fill="#b9a58a" stroke="{INK}" stroke-width="2.2"/>',
+        eyes_extra=brows(50, color="#a8521f", w=3.4),
+        face_extra=f'<path d="M40 64 C40 82 50 87 60 87 C70 87 80 82 80 64 C76 74 70 76 60 76 C50 76 44 74 40 64 Z" fill="#c8692e" stroke="{INK}" stroke-width="2.2"/>'
+        f'<path d="M50 84 l-2 16 l5 0 l1 -14 Z M70 84 l2 16 l-5 0 l-1 -14 Z" fill="#c8692e" stroke="{INK}" stroke-width="2"/>'
+        f'<path d="M48 70 C52 65 58 66 60 68 C62 66 68 65 72 70 C68 73 63 72 60 71 C57 72 52 73 48 70 Z" fill="#b25a24" stroke="{INK}" stroke-width="2"/>',
+        mouth=f'<path d="M55 76 q5 3 10 0" fill="none" stroke="{INK}" stroke-width="2" stroke-linecap="round"/>',
+        cheeks=False,
+        front=f'<path d="M36 40 C24 34 18 20 25 10 C28 22 33 29 42 33 Z M84 40 C96 34 102 20 95 10 C92 22 87 29 78 33 Z" fill="#efe6cf" stroke="{INK}" stroke-width="2.5"/>'
+        f'<path d="M36 47 C36 25 84 25 84 47 Z" fill="#9aa3ab" stroke="{INK}" stroke-width="2.5"/>'
+        f'<rect x="34" y="42" width="52" height="8" rx="3" fill="#7d868e" stroke="{INK}" stroke-width="2.2"/>'
+        f'<path d="M60 28 v14" stroke="{INK}" stroke-width="2"/>'
+        f'<circle cx="42" cy="46" r="1.4" fill="{INK}"/><circle cx="60" cy="46" r="1.4" fill="{INK}"/><circle cx="78" cy="46" r="1.4" fill="{INK}"/>',
+    ),
+    # Detective: fedora, trench coat collar, magnifying glass
+    "detective": svg(
+        "a detective",
+        bg="#ece3cf",
+        skin="#c58c64",
+        shirt="#c9b28a",
+        blink_delay=3.0,
+        neck_extra=f'<path d="M44 86 L60 104 L50 122 L30 122 L34 98 Z M76 86 L60 104 L70 122 L90 122 L86 98 Z" fill="#b89c70" stroke="{INK}" stroke-width="2.2"/>'
+        f'<path d="M54 92 l6 8 l6 -8" fill="#3a2f25" stroke="{INK}" stroke-width="1.8"/>'
+        f'<circle cx="89" cy="96" r="10" fill="#cfe6ef" fill-opacity=".7" stroke="{INK}" stroke-width="3"/>'
+        f'<path d="M82 103 l-10 12" stroke="#5a4a38" stroke-width="5" stroke-linecap="round"/>',
+        eyes_extra=brows(50, tilt=-2, w=3),
+        mouth=f'<path d="M53 70 q8 4 15 -1" fill="none" stroke="{INK}" stroke-width="2.4" stroke-linecap="round"/>',
+        front=f'<path d="M40 43 C40 26 80 26 80 43 Z" fill="#6b5a45" stroke="{INK}" stroke-width="2.5"/>'
+        f'<path d="M50 30 q10 6 20 0" fill="none" stroke="#54462f" stroke-width="2"/>'
+        f'<rect x="40" y="37" width="40" height="6" fill="#3a2f25"/>'
+        f'<path d="M26 45 C40 38 80 38 94 45 C80 51 40 51 26 45 Z" fill="#5a4a38" stroke="{INK}" stroke-width="2.5"/>',
+    ),
+    # Pilot: leather flying cap with goggles up, white scarf, bomber jacket
+    "pilot": svg(
+        "a pilot",
+        bg="#cfe0ee",
+        skin="#e6b48f",
+        shirt="#6b4a2e",
+        blink_delay=4.6,
+        neck_extra=f'<path d="M34 96 C40 88 50 90 60 90 C70 90 80 88 86 96 C78 102 42 102 34 96 Z" fill="#c9b08c" stroke="{INK}" stroke-width="2.2"/>'
+        f'<path d="M44 86 C52 94 68 94 76 86 L78 92 C68 100 52 100 42 92 Z" fill="#fbf7ee" stroke="{INK}" stroke-width="2.2"/>'
+        f'<path d="M66 94 l10 20 l-8 2 l-6 -18 z" fill="#fbf7ee" stroke="{INK}" stroke-width="2"/>',
+        eyes_extra=brows(51),
+        mouth=smile,
+        front=f'<path d="M36 52 C34 28 86 28 84 52 C84 58 86 64 84 72 L79 72 C79 62 78 55 76 50 C68 45 52 45 44 50 C42 55 41 62 41 72 L36 72 C34 64 36 58 36 52 Z" fill="#7a4f2c" stroke="{INK}" stroke-width="2.5"/>'
+        f'<path d="M37 44 C50 40 70 40 83 44" fill="none" stroke="#3a2a1e" stroke-width="3"/>'
+        f'<circle cx="51" cy="40" r="7" fill="#9fd0e6" stroke="{INK}" stroke-width="2.5"/>'
+        f'<circle cx="69" cy="40" r="7" fill="#9fd0e6" stroke="{INK}" stroke-width="2.5"/>'
+        f'<path d="M58 40 h4" stroke="{INK}" stroke-width="2.5"/>'
+        '<path d="M48 37 l3 -2" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M66 37 l3 -2" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>',
+    ),
 }
+
+readers["polarbear"] = polar_bear()
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)

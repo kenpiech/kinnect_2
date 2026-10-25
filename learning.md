@@ -337,3 +337,4 @@ Clerk is mostly off the wire. My server and Supabase both check the token's sign
 - **Database:** a migration added `profiles.avatar` with a **check that only allows the 12 names**, plus a column grant to update it. Tested: Bob can set his own, can't change Alice's, and `'../../evil'` is rejected by the check, so nobody can point their avatar at an arbitrary path.
 - **Caught (my own Me post):** a post showed up in Feed but not on Me, because Me still read A3's localStorage. That prompted rebuilding Me on Supabase.
 - Added a 13th avatar on request: long blonde hair (`blonde`). A new drawing also means a migration, since the `profiles.avatar` check lists every key.
+- Added six character avatars on request: ninja, wizard, viking, detective, pilot and a polar bear (19 in all). The bear isn't a person, so it has its own drawing function with the same outline and blink. Checked that the app's list, the drawing files and the database check all name the same 19.

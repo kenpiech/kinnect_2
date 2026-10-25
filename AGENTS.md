@@ -29,14 +29,14 @@ A small social network for classmates who read: save books to your library, add 
 - **People tab:** list and search other users. Request, Accept and Remove (Remove also covers decline, cancel and unfriend).
 - **Posts:** up to 280 characters, optionally about one book from your library. Your feed shows your posts and your accepted friends' posts, newest first.
 - **Tabs:** Feed · Library · People · Me.
-- **Avatars are required.** Everyone picks one of 13 drawn readers (`public/avatars/readers`, drawn by `scripts/reader_avatars.py`; keys in `src/lib/avatars.ts` and the `profiles.avatar` check). Until they do, `ProfileSync` shows `AvatarGate`, a modal `<dialog>` that Escape can't close. They can change it on Me. Avatars show on posts, People and Me. Initials are only a fallback.
+- **Avatars are required.** Everyone picks one of 19 drawn avatars (13 readers plus a ninja, wizard, viking, detective, pilot and polar bear) (`public/avatars/readers`, drawn by `scripts/reader_avatars.py`; keys in `src/lib/avatars.ts` and the `profiles.avatar` check). Until they do, `ProfileSync` shows `AvatarGate`, a modal `<dialog>` that Escape can't close. They can change it on Me. Avatars show on posts, People and Me. Initials are only a fallback.
 
 ## Data model
 Four tables in Supabase. Every ID that names a person is a **Clerk user ID** (`text`), and columns that record "who did this" default to `auth.jwt()->>'sub'`. Below, **me** means `auth.jwt()->>'sub'`.
 
 | Table | Columns | Who can do what (RLS) |
 |---|---|---|
-| `profiles` | `user_id` text PK, `display_name` text, `avatar` (one of 13 keys, null until picked), `created_at` | **read:** any signed-in user (People needs names). **insert/update:** own row only (`display_name` and `avatar` columns). |
+| `profiles` | `user_id` text PK, `display_name` text, `avatar` (one of 19 keys, null until picked), `created_at` | **read:** any signed-in user (People needs names). **insert/update:** own row only (`display_name` and `avatar` columns). |
 | `library_items` | `id`, `user_id`, `ol_key` (e.g. `/works/OL27482W`), `title`, `author`, `cover_id` and `year` (all three nullable), `added_at`; unique (`user_id`, `ol_key`) | **read/insert/delete:** own rows only. Private, even from friends. |
 | `friendships` | `id`, `requester_id`, `addressee_id`, `status` (`pending` or `accepted`), `created_at`; one row per pair of people | **read:** either person. **insert:** requester is me, status `pending`. **update:** addressee is me (to accept). **delete:** either person. |
 | `posts` | `id`, `user_id`, `body` (1–280 chars), `book_ol_key`, `book_title`, `book_author` (all nullable), `created_at` | **read:** my posts, or posts by someone I have an **accepted** friendship with. **insert/delete:** own only. |

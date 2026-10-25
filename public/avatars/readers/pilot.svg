@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of a pilot">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 4.6s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#cfe0ee"/>
+
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#6b4a2e" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#e6b48f" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M34 96 C40 88 50 90 60 90 C70 90 80 88 86 96 C78 102 42 102 34 96 Z" fill="#c9b08c" stroke="#2b2620" stroke-width="2.2"/><path d="M44 86 C52 94 68 94 76 86 L78 92 C68 100 52 100 42 92 Z" fill="#fbf7ee" stroke="#2b2620" stroke-width="2.2"/><path d="M66 94 l10 20 l-8 2 l-6 -18 z" fill="#fbf7ee" stroke="#2b2620" stroke-width="2"/>
+<circle cx="38" cy="59" r="5.5" fill="#e6b48f" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#e6b48f" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#e6b48f" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="45" cy="66" r="4.5" fill="#e8907a" opacity=".35"/><circle cx="75" cy="66" r="4.5" fill="#e8907a" opacity=".35"/>
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 51 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="2.6" stroke-linecap="round"/><path d="M64 51 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+
+<path d="M51 69 q9 7 18 0" fill="none" stroke="#2b2620" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M36 52 C34 28 86 28 84 52 C84 58 86 64 84 72 L79 72 C79 62 78 55 76 50 C68 45 52 45 44 50 C42 55 41 62 41 72 L36 72 C34 64 36 58 36 52 Z" fill="#7a4f2c" stroke="#2b2620" stroke-width="2.5"/><path d="M37 44 C50 40 70 40 83 44" fill="none" stroke="#3a2a1e" stroke-width="3"/><circle cx="51" cy="40" r="7" fill="#9fd0e6" stroke="#2b2620" stroke-width="2.5"/><circle cx="69" cy="40" r="7" fill="#9fd0e6" stroke="#2b2620" stroke-width="2.5"/><path d="M58 40 h4" stroke="#2b2620" stroke-width="2.5"/><path d="M48 37 l3 -2" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M66 37 l3 -2" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+</g>
+</svg>

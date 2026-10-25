@@ -11,7 +11,7 @@ import { Button, Toast, useToast } from "./ui";
 function AvatarChoices({ value, onChange }: { value: string | null; onChange: (key: string) => void }) {
   const name = useId();
   return (
-    <div className="grid grid-cols-4 gap-3 sm:grid-cols-6">
+    <div className="grid grid-cols-4 gap-3 sm:grid-cols-5">
       {AVATARS.map((a) => (
         <label
           key={a.key}
