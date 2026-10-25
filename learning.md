@@ -301,3 +301,15 @@ Clerk is mostly off the wire. My server and Supabase both check the token's sign
 **Trade-offs:** an extra hop, my server becomes a dependency, all searches share one IP (so the cache matters), and a slow Open Library answer keeps a Vercel function busy while it waits.
 
 **Why Save goes through the server too:** the browser could call Supabase directly with the Clerk token, and RLS would still protect the data. A Server Action keeps the validation and database code out of the page, and returns the updated library in the same response.
+
+## Step 7 · People and friends
+
+**What got built:**
+- **`/people`** lists everyone on Kinnect, grouped by how they're connected to me: **Requests for you** (Accept / Decline), **Friends** (Remove, with a second tap to confirm), **Requests you sent** (Cancel), and **People you may know** (Add friend, with a name filter once there are more than five).
+- **`getPeople()`** reads all profiles (any signed-in user may) and my friendships (RLS returns only rows I'm in), then labels each person: none, sent, received, or friends.
+- **Actions:** `sendFriendRequest`, `acceptFriendRequest` and `removeFriendship`. Decline, cancel and unfriend are the same thing: the row goes away.
+- The tabs are now **Feed · Library · People · Me**, and A3's Friends and Add pages are gone.
+
+**How the database keeps it honest:** the app sends only `addressee_id`, and `requester_id` (me) and `status` (pending) fill themselves in. The "send a friend request" policy checks both. Accepting can change only `status` (the column grant), and only on a pending request sent to me (the policy). If an accept matches no row, the request was cancelled, and the page says so.
+
+**Deploying early:** to test with a second real person, Kinnect went on Vercel (`kinnect-2.vercel.app`) before step 11. Production tracks `full-stack` until the merge, because preview links sit behind a Vercel login and change on every push, and a passkey only works on the address it was made on. Vercel holds the Clerk secret key (marked Sensitive). The server needs it, and it never reaches the browser.
