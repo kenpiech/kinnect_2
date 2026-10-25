@@ -1,5 +1,6 @@
 import "server-only";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import type { LibraryItem } from "./database.types";
 import { supabase } from "./supabase";
 
 // Reads and server-side writes for server components. These aren't Server
@@ -35,4 +36,16 @@ export async function ensureProfile() {
   const { error } = await db.from("profiles").insert({ display_name: displayName });
   // 23505: another tab created it a moment ago
   if (error && error.code !== "23505") console.error("Couldn't create profile:", error.message);
+}
+
+// Your saved books, newest first. No user filter: the "read my library"
+// policy already returns only yours. Null means Supabase couldn't be reached.
+export async function getLibrary(): Promise<LibraryItem[] | null> {
+  const db = await supabase();
+  const { data, error } = await db.from("library_items").select("*").order("added_at", { ascending: false });
+  if (error) {
+    console.error("Couldn't read library:", error.message);
+    return null;
+  }
+  return data;
 }

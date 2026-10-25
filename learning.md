@@ -222,3 +222,32 @@ How the CLI works: `clerk auth login` (in my terminal) saves a token in the macO
 | `select * from library_items` (no filter) | 1, his own |
 
 The **read my library** policy blocked it. **Reads fail silently:** Bob gets zero rows, not an error, so he can't even tell whether Alice has a library. **Writes fail loudly:** inserting a post with Alice's ID gives `new row violates row-level security policy`. That's why the app never filters by user: `select * from library_items` already returns only mine, and a filter in the app would hide a broken policy from the Playwright test.
+
+## Step 6 · Library tab (Open Library)
+
+**What got built:**
+- **`/api/books?q=`**, the server proxy to Open Library: signed-in users only, an 8-second timeout, each search cached for an hour, and a User-Agent naming Kinnect and its repo (Open Library asks for one; I used the repo URL, not my email).
+- **`src/lib/actions.ts`:** `saveBook` and `removeBook` as Server Actions. Each checks the session and validates its arguments (`ol_key` format, lengths, whole numbers), then `refresh()`es the page.
+- **`/library`:** search, plus "Your library" from Supabase. Removing a book offers Undo.
+- Types generated from the live schema (`database.types.ts`), so a misspelled column fails the build.
+
+**Why search goes through our server, not the browser:** one place for the timeout, the cache and the User-Agent; a signed-in check, so strangers can't use Kinnect as a free search proxy; and the browser only ever talks to Kinnect.
+
+**The designed states, all tested in the browser:**
+
+| State | What you see |
+|---|---|
+| Empty library | "Nothing saved yet", and that only you can see it |
+| Loading | "Searching Open Library…" and placeholder rows; after 2.5 s, "Still searching. Open Library can take a few seconds." |
+| Results | covers (or a cloth-cover fallback with the first letter), author · year, Save → Saving… → Saved |
+| Nothing found | "No books match '…'" with a suggestion (`numFound: 0` is a 200, not an error) |
+| Open Library down | Wi-Fi off: "Open Library isn't answering" with Try again, and my saved books still listed (they come from Supabase) |
+| Signed out mid-search | "Your session ended" with Sign in |
+| Empty search | error under the field, nothing sent |
+
+**Measured:** Open Library took 1.8–6.1 s per search, and with Wi-Fi off the proxy failed fast (`502` in 40 ms). Four books saved, all under my user ID, and still there after a reload.
+
+**Caught:**
+- **The API answered signed-out requests with a redirect to the sign-in page.** A `fetch()` can't use an HTML page. The proxy now answers `/api/*` with `401 {"error":"signed_out"}`, and the handler checks again.
+- **Server Actions are public endpoints.** Anyone can POST any arguments to `saveBook`, so it checks the session and validates every field instead of trusting the page. RLS is still the real lock: a forged `user_id` can't get past "add to my library".
+- **No cover, or a broken one:** many books have no `cover_i`, and some point at nothing. Asking with `?default=false` makes a missing cover a 404 instead of a blank image, so the page shows its own fallback.

@@ -7,7 +7,15 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) await auth.protect();
+  if (isPublicRoute(req)) return;
+  // APIs answer 401 rather than redirecting to the sign-in page, which a
+  // fetch() in the browser can't do anything with
+  if (req.nextUrl.pathname.startsWith("/api/")) {
+    const { userId } = await auth();
+    if (!userId) return Response.json({ error: "signed_out" }, { status: 401 });
+    return;
+  }
+  await auth.protect();
 });
 
 export const config = {

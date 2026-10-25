@@ -8,6 +8,7 @@ import { ButtonLink } from "./ui";
 
 const tabs = [
   { href: "/feed", label: "Feed" },
+  { href: "/library", label: "Library" },
   { href: "/friends", label: "Friends" },
   { href: "/friends/add", label: "Add" },
   { href: "/me", label: "Me" },
