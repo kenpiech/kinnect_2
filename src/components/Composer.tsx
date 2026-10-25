@@ -10,7 +10,8 @@ import { BookCover } from "./books";
 import { Banner, Button, Field, TextLink } from "./ui";
 
 // The Write page's form: up to 280 characters, and optionally one book from
-// your library. What you type is kept as a draft on this device, so leaving
+// your library. The book list stays folded away unless you open it, or came
+// from a book's "Post about it" link. What you type is kept as a draft on this device, so leaving
 // doesn't lose it. Errors sit under the box and never clear what you wrote.
 export function Composer({
   library,
@@ -24,6 +25,7 @@ export function Composer({
   const router = useRouter();
   const text = useDraft();
   const [book, setBook] = useState<string | null>(initialBook);
+  const [picking, setPicking] = useState(initialBook !== null);
   const [error, setError] = useState<string>();
   const [bookError, setBookError] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -47,7 +49,10 @@ export function Composer({
     const result = await createPost({ body: text, bookOlKey: book });
     if (!result.ok) {
       setBusy(false);
-      if (result.field === "book") setBookError(result.error);
+      if (result.field === "book") {
+        setBookError(result.error);
+        setPicking(true);
+      }
       else {
         setError(result.error);
         box.current?.focus();
@@ -81,40 +86,66 @@ export function Composer({
         }
       />
 
-      <fieldset className="grid gap-2">
-        <legend className="label mb-1">
-          Add a book from your library <span className="font-normal text-muted">(optional)</span>
-        </legend>
-        {libraryFailed ? (
-          <p className="text-muted">Couldn&apos;t load your library just now, so this post can go without a book.</p>
-        ) : library.length === 0 ? (
-          <p className="text-muted">
-            Your library is empty. <TextLink href="/library">Save a book</TextLink> to mention it in a post.
-          </p>
-        ) : (
-          <div className="grid max-h-96 gap-2 overflow-y-auto rounded-2xl border border-rule bg-surface p-3">
-            <BookChoice checked={book === null} onChange={() => setBook(null)}>
-              <span className="text-[17px]">No book</span>
-            </BookChoice>
-            {library.map((item) => (
-              <BookChoice key={item.id} checked={book === item.ol_key} onChange={() => setBook(item.ol_key)}>
-                <BookCover
-                  book={{ olKey: item.ol_key, title: item.title, author: item.author, coverId: item.cover_id, year: item.year }}
-                />
-                <span className="min-w-0">
-                  <span className="block break-words font-semibold leading-snug">{item.title}</span>
-                  <span className="block text-[15px] text-muted">{item.author ?? "Unknown author"}</span>
-                </span>
-              </BookChoice>
-            ))}
-          </div>
+      <div className="grid gap-2">
+        <button
+          type="button"
+          aria-expanded={picking}
+          aria-controls="book-picker"
+          onClick={() => setPicking((p) => !p)}
+          className="flex min-h-11 cursor-pointer items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-4 py-3 text-left hover:bg-hover"
+        >
+          <span className="min-w-0">
+            {chosen ? (
+              <>
+                <span className="label">Book: </span>
+                <span className="break-words">{chosen.title}</span>
+              </>
+            ) : (
+              <>
+                <span className="label">Add a book from your library</span>{" "}
+                <span className="text-muted">(optional)</span>
+              </>
+            )}
+          </span>
+          <span aria-hidden="true" className="text-accent">
+            {picking ? "▴" : "▾"}
+          </span>
+        </button>
+        {picking && (
+          <fieldset id="book-picker" className="grid gap-2">
+            <legend className="sr-only">Book for this post</legend>
+            {libraryFailed ? (
+              <p className="text-muted">Couldn&apos;t load your library just now, so this post can go without a book.</p>
+            ) : library.length === 0 ? (
+              <p className="text-muted">
+                Your library is empty. <TextLink href="/library">Save a book</TextLink> to mention it in a post.
+              </p>
+            ) : (
+              <div className="grid max-h-96 gap-2 overflow-y-auto rounded-2xl border border-rule bg-surface p-3">
+                <BookChoice checked={book === null} onChange={() => setBook(null)}>
+                  <span className="text-[17px]">No book</span>
+                </BookChoice>
+                {library.map((item) => (
+                  <BookChoice key={item.id} checked={book === item.ol_key} onChange={() => setBook(item.ol_key)}>
+                    <BookCover
+                      book={{ olKey: item.ol_key, title: item.title, author: item.author, coverId: item.cover_id, year: item.year }}
+                    />
+                    <span className="min-w-0">
+                      <span className="block break-words font-semibold leading-snug">{item.title}</span>
+                      <span className="block text-[15px] text-muted">{item.author ?? "Unknown author"}</span>
+                    </span>
+                  </BookChoice>
+                ))}
+              </div>
+            )}
+          </fieldset>
         )}
         {bookError && (
           <Banner tone="accent" title="About that book">
             {bookError}
           </Banner>
         )}
-      </fieldset>
+      </div>
 
       <Button type="submit" disabled={busy} className="w-full sm:w-auto sm:justify-self-start">
         {busy ? "Posting…" : chosen ? "Post about this book" : "Post"}

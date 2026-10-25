@@ -18,3 +18,17 @@ export const OL_WORK_KEY = /^\/works\/OL[0-9]+W$/;
 export function coverUrl(coverId: number) {
   return `https://covers.openlibrary.org/b/id/${coverId}-M.jpg?default=false`;
 }
+
+// Where you are with a book in your library, in the order they're shown. The
+// same three values the database allows on library_items.status.
+export const READING_STATUSES = [
+  { value: "want", label: "Want to read" },
+  { value: "reading", label: "Reading" },
+  { value: "finished", label: "Finished" },
+] as const;
+
+export type ReadingStatus = (typeof READING_STATUSES)[number]["value"];
+
+export function isReadingStatus(value: unknown): value is ReadingStatus {
+  return READING_STATUSES.some((s) => s.value === value);
+}

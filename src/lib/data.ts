@@ -248,3 +248,94 @@ export async function getMe(): Promise<{
     posts: (posts.data ?? []).map((p) => toFeedPost(p, userId, new Set(books.data?.map((b) => b.ol_key)))),
   };
 }
+
+// How a friendship row (or none) looks from my side, as on People
+function connection(
+  f: { id: string; requester_id: string; status: string } | null,
+  me: string,
+): Pick<Person, "status" | "friendshipId"> {
+  const status: Person["status"] = !f
+    ? "none"
+    : f.status === "accepted"
+      ? "friends"
+      : f.requester_id === me
+        ? "sent"
+        : "received";
+  return { status, friendshipId: f?.id ?? null };
+}
+
+export type PersonPage = { person: Person; posts: FeedPost[]; readAt: number };
+
+// One classmate's page: who they are, how you're connected, and their posts,
+// newest first. userId must already be a valid Clerk user ID (the page checks).
+// Null means Supabase couldn't be reached; "missing" means no such person.
+//
+// There's deliberately no "only if friends" check here. The posts read policy
+// returns their posts only when you're friends, and the Playwright test relies
+// on the app not repeating that policy.
+export async function getPersonPage(userId: string): Promise<PersonPage | "missing" | null> {
+  // Checked here too, not just on the page: the id goes into the .or() filter
+  // string below, so it must never contain commas, dots or brackets
+  if (!/^user_[A-Za-z0-9]+$/.test(userId)) return "missing";
+  const { userId: me } = await auth();
+  if (!me) return null;
+  const db = await supabase();
+  // These filters pick *this person's* profile, friendship row and posts out
+  // of what I'm allowed to read (every profile; only friendships I'm in; only
+  // my own and my friends' posts). They select, they don't stand in for a policy.
+  const [profile, friendship, posts, books] = await Promise.all([
+    db.from("profiles").select("user_id, display_name, avatar").eq("user_id", userId).maybeSingle(),
+    db
+      .from("friendships")
+      .select("id, requester_id, status")
+      .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
+      .maybeSingle(),
+    postQuery(db).eq("user_id", userId).order("created_at", { ascending: false }),
+    myBookKeys(db),
+  ]);
+  const failed = profile.error ?? friendship.error ?? posts.error ?? books.error;
+  if (failed) {
+    console.error("Couldn't read person:", failed.message);
+    return null;
+  }
+  if (!profile.data) return "missing";
+  const saved = new Set((books.data ?? []).map((b) => b.ol_key));
+  return {
+    person: {
+      userId: profile.data.user_id,
+      name: profile.data.display_name,
+      avatar: profile.data.avatar,
+      ...connection(friendship.data, me),
+    },
+    readAt: Date.now(),
+    posts: (posts.data ?? []).map((p) => toFeedPost(p, me, saved)),
+  };
+}
+
+// How many friend requests are waiting on you, for the badge on the People
+// tab. 0 when signed out (without asking the database) or if anything fails,
+// since a missing badge is better than a broken nav.
+export async function getPendingRequestCount(): Promise<number> {
+  // Outside the try, so Next's own request-time signals from auth() pass through
+  const { userId } = await auth();
+  if (!userId) return 0;
+  try {
+    const db = await supabase();
+    // The addressee filter picks the direction (people who asked *me*, not
+    // people I asked). The "read my friendships" policy already limits rows to
+    // ones I'm in.
+    const { count, error } = await db
+      .from("friendships")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending")
+      .eq("addressee_id", userId);
+    if (error) {
+      console.error("Couldn't count friend requests:", error.message);
+      return 0;
+    }
+    return count ?? 0;
+  } catch (error) {
+    console.error("Couldn't count friend requests:", error);
+    return 0;
+  }
+}

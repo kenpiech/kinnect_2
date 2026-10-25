@@ -1,20 +1,24 @@
 "use client";
 
+import Link from "next/link";
 import { useOptimistic, useRef, useState, useTransition } from "react";
-import { addComment, deleteComment, deletePost, likePost, unlikePost } from "@/lib/actions";
+import { addComment, deleteComment, deletePost, likePost, saveBookFromPost, unlikePost } from "@/lib/actions";
 import type { FeedPost } from "@/lib/data";
 import { MAX_POST, postLength, timeAgo } from "@/lib/posts";
 import { ConfirmDelete } from "./ConfirmDelete";
-import { Avatar, Button, Field } from "./ui";
+import { Avatar, Button, ButtonLink, Field } from "./ui";
 
-// Under each post: Like, Comment and (on your own posts) Delete, then who
-// liked it, the comments, and the comment box. The heart turns red the moment
+// Under each post: Like, Comment, Save (when it's about a book you don't have
+// yet) and, on your own posts, Delete. Then who liked it, the comments, and
+// the comment box. The heart turns red the moment
 // you tap it; if the server refuses, it flips back and says why.
 export function PostFooter({ post, now }: { post: FeedPost; now: number }) {
   const [, startTransition] = useTransition();
   const [likedByMe, setLikedByMe] = useOptimistic(post.likes.mine);
   const [likeError, setLikeError] = useState<string | null>(null);
   const [writing, setWriting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const likeCount = post.likes.others.length + (likedByMe ? 1 : 0);
   const likers = likedByMe ? ["You", ...post.likes.others] : post.likes.others;
 
@@ -26,6 +30,14 @@ export function PostFooter({ post, now }: { post: FeedPost; now: number }) {
       const result = next ? await likePost(post.id) : await unlikePost(post.id);
       if (!result.ok) setLikeError(result.error);
     });
+  }
+
+  async function saveBook() {
+    setSaving(true);
+    setSaveError(null);
+    const result = await saveBookFromPost(post.id);
+    setSaving(false);
+    if (!result.ok) setSaveError(result.error);
   }
 
   return (
@@ -52,11 +64,22 @@ export function PostFooter({ post, now }: { post: FeedPost; now: number }) {
           Comment
           {post.comments.length > 0 && <span className="font-normal">· {post.comments.length}</span>}
         </Button>
+        {post.bookTitle &&
+          (post.bookSaved ? (
+            <ButtonLink href="/library" variant="quiet" className="min-h-9 text-[15px] text-muted">
+              In your library
+            </ButtonLink>
+          ) : (
+            <Button variant="quiet" disabled={saving} onClick={saveBook} className="min-h-9 text-muted no-underline">
+              {saving ? "Saving…" : "Save book"}
+              <span className="sr-only"> {post.bookTitle} to your library</span>
+            </Button>
+          ))}
         {post.mine && <ConfirmDelete what="this post" remove={() => deletePost(post.id)} />}
       </div>
-      {likeError && (
+      {(likeError || saveError) && (
         <p role="alert" className="text-[15px] text-danger">
-          {likeError}
+          {likeError ?? saveError}
         </p>
       )}
       {likers.length > 0 && <p className="text-[14px] text-muted">Liked by {listNames(likers)}</p>}
@@ -65,11 +88,15 @@ export function PostFooter({ post, now }: { post: FeedPost; now: number }) {
         <ul aria-label="Comments" className="mt-3 grid gap-3">
           {post.comments.map((c) => (
             <li key={c.id} className="flex gap-2">
-              <Avatar name={c.authorName} avatar={c.authorAvatar} size="sm" />
+              <Link href={c.mine ? "/me" : `/people/${c.authorId}`} tabIndex={-1} aria-hidden="true">
+                <Avatar name={c.authorName} avatar={c.authorAvatar} size="sm" />
+              </Link>
               <div className="min-w-0 flex-1">
                 <div className="rounded-2xl bg-surface px-3 py-2">
                   <p className="text-[14px] leading-snug">
-                    <span className="font-semibold">{c.mine ? "You" : c.authorName}</span>
+                    <Link href={c.mine ? "/me" : `/people/${c.authorId}`} className="font-semibold hover:underline">
+                      {c.mine ? "You" : c.authorName}
+                    </Link>
                     <time dateTime={c.createdAt} className="text-muted">
                       {" "}
                       · {timeAgo(new Date(c.createdAt).getTime(), now)}

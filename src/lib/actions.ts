@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { refresh } from "next/cache";
 import { isAvatar } from "./avatars";
-import { OL_WORK_KEY, type Book } from "./books";
+import { isReadingStatus, OL_WORK_KEY, type Book } from "./books";
 import { ensureProfile } from "./data";
 import { MAX_POST, postLength } from "./posts";
 import { supabase } from "./supabase";
@@ -28,7 +28,8 @@ function whole(value: unknown, min: number, max: number) {
   return Number.isInteger(value) && (value as number) >= min && (value as number) <= max ? (value as number) : null;
 }
 
-export async function saveBook(book: Book): Promise<ActionResult> {
+// status is only given when undoing a remove, so the book comes back as it was
+export async function saveBook(book: Book, status?: string): Promise<ActionResult> {
   const { userId } = await auth();
   if (!userId) return SIGNED_OUT;
 
@@ -43,6 +44,7 @@ export async function saveBook(book: Book): Promise<ActionResult> {
     author: text(book.author, 300),
     cover_id: whole(book.coverId, 1, 2_147_483_647),
     year: whole(book.year, -3000, 3000),
+    ...(isReadingStatus(status) && { status }),
   };
 
   const db = await supabase();
@@ -57,6 +59,25 @@ export async function saveBook(book: Book): Promise<ActionResult> {
     console.error("Couldn't save book:", error.message);
     return { ok: false, error: `Couldn't save ${title}. Try again.` };
   }
+  refresh();
+  return { ok: true };
+}
+
+// Want to read, Reading or Finished. Only the status column can be updated,
+// and the "update my library" policy only matches your own books.
+export async function setReadingStatus(id: string, status: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof id !== "string" || !UUID.test(id)) return { ok: false, error: "Couldn't find that book. Reload and retry." };
+  if (!isReadingStatus(status)) return { ok: false, error: "Pick Want to read, Reading or Finished." };
+
+  const db = await supabase();
+  const { data, error } = await db.from("library_items").update({ status }).eq("id", id).select("id");
+  if (error) {
+    console.error("Couldn't set reading status:", error.message);
+    return { ok: false, error: "Couldn't change it. Try again." };
+  }
+  if (data.length === 0) return { ok: false, error: "That book isn't in your library anymore. Reload to see." };
   refresh();
   return { ok: true };
 }
@@ -151,7 +172,7 @@ export async function createPost(input: { body: string; bookOlKey: string | null
   if (length > MAX_POST) return { ok: false, error: `Keep it to ${MAX_POST} characters. You're ${length - MAX_POST} over.` };
 
   const db = await supabase();
-  let book: { ol_key: string; title: string; author: string | null } | null = null;
+  let book: { ol_key: string; title: string; author: string | null; cover_id: number | null } | null = null;
   if (input.bookOlKey !== null) {
     if (typeof input.bookOlKey !== "string" || !OL_WORK_KEY.test(input.bookOlKey)) {
       return { ok: false, error: "That book didn't come through. Pick it again.", field: "book" };
@@ -160,7 +181,7 @@ export async function createPost(input: { body: string; bookOlKey: string | null
     // filter picks the one
     const { data, error } = await db
       .from("library_items")
-      .select("ol_key, title, author")
+      .select("ol_key, title, author, cover_id")
       .eq("ol_key", input.bookOlKey)
       .maybeSingle();
     if (error) {
@@ -173,7 +194,13 @@ export async function createPost(input: { body: string; bookOlKey: string | null
     book = data;
   }
 
-  const row = { body, book_ol_key: book?.ol_key ?? null, book_title: book?.title ?? null, book_author: book?.author ?? null };
+  const row = {
+    body,
+    book_ol_key: book?.ol_key ?? null,
+    book_title: book?.title ?? null,
+    book_author: book?.author ?? null,
+    book_cover_id: book?.cover_id ?? null,
+  };
   let { error } = await db.from("posts").insert(row);
   if (error?.code === "23503") {
     await ensureProfile();
@@ -183,6 +210,43 @@ export async function createPost(input: { body: string; bookOlKey: string | null
     console.error("Couldn't create post:", error.message);
     return { ok: false, error: "Couldn't post. Try again." };
   }
+  return { ok: true };
+}
+
+// "Save to my library" on a post. The book is copied from the post itself,
+// read here on the server, so it can only be a book from a post you're
+// allowed to see (the posts read policy), never details sent by the page.
+export async function saveBookFromPost(postId: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof postId !== "string" || !UUID.test(postId)) return POST_GONE;
+
+  const db = await supabase();
+  const { data: post, error: readError } = await db
+    .from("posts")
+    .select("book_ol_key, book_title, book_author, book_cover_id")
+    .eq("id", postId)
+    .maybeSingle();
+  if (readError) {
+    console.error("Couldn't read post to save its book:", readError.message);
+    return { ok: false, error: "Couldn't save it. Try again." };
+  }
+  if (!post) return POST_GONE;
+  if (!post.book_ol_key || !post.book_title) return { ok: false, error: "That post isn't about a book." };
+
+  // user_id fills itself in, and status starts as "want to read"
+  const { error } = await db.from("library_items").insert({
+    ol_key: post.book_ol_key,
+    title: post.book_title,
+    author: post.book_author,
+    cover_id: post.book_cover_id,
+  });
+  // 23505: already in your library, which is what you wanted
+  if (error && error.code !== "23505") {
+    console.error("Couldn't save book from post:", error.message);
+    return { ok: false, error: `Couldn't save ${post.book_title}. Try again.` };
+  }
+  refresh();
   return { ok: true };
 }
 

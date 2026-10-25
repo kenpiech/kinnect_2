@@ -401,3 +401,51 @@ The policy was loose for under a minute. After restoring, Postgres confirmed the
 - The test readers' emails (`lib2-reader-…`), because they're existing Clerk accounts.
 - Migrations already applied, the saved test evidence, and the history above.
 - The live address `lib-2-app.vercel.app`, because a passkey only works on the address it was made on. Moving to a Kinnect address is my decision to make.
+
+## All lowercase: kinnect
+
+I asked for **kinnect** in lowercase everywhere, even at the start of a sentence: the logo, titles, messages, User-Agent and AGENTS.md. The A3-era README, flows and research docs keep the old spelling until the README is rewritten at step 12.
+
+## Features · Reading status, save from a post, a person's page, the request badge, invite
+
+I asked for all of the remaining v1 features at once and to "use subagents as needed, check their work." The split:
+- **I built** the database change, reading status and "Save book" (they share the migration and the post data).
+- **A subagent built** the person's page, the badge and the Invite button at the same time, in files I wasn't touching.
+- **A second, fresh subagent reviewed** all of it afterwards, given the code and not my conclusions.
+
+**Reading status** (`supabase/migrations/reading_status_and_post_covers.sql`): each saved book is **Want to read** (the default), **Reading** or **Finished**, with filter buttons on the Library tab. It's private like the rest of your library. This was the first time `library_items` needed an update, so it got an "update my library" policy and a grant on the `status` column only. Checked with made-up users, rolled back: a new book starts as "want"; you can change your own; a made-up status is refused (23514); editing a title or giving the book to someone else is refused (42501); another person's change affects 0 rows.
+
+**Save book from a post:** a post about a book shows "Save book", or "In your library" once you have it. The server copies the book **from the post**, which it reads under the posts read policy. So you can only save a book from a post you're allowed to see, and the page can't slip in a fake title. Posts now also copy the book's **cover**, so the friend's copy has one. Older posts don't have a cover.
+
+**A person's page** (`/people/[userId]`): avatar, name, how you're connected, the friend buttons, and their posts, which the database returns only to friends. Names and avatars on posts, comments and People link to it. **The page shows whatever posts come back and doesn't decide on its own whether you're friends.** That way a broken policy would be visible, and the privacy test now also checks that B can't see A's post on A's page.
+
+**Badge and invite:** the People tab shows how many requests are waiting on you. It streams into the nav, so the tabs never wait for it, and it disappears once you accept. "Invite a classmate" opens the phone's share sheet, or copies the link on a computer.
+
+**Checking the subagent's work:** I read every file it changed before running anything.
+- It had followed the rules: no friends-only check in the app, filters that pick a person rather than repeat a policy, no database call for the badge when signed out.
+- It also explained why it chose a different badge design from the one I suggested (passing a promise rather than rendering the nav twice). It cited the Next docs, and its reasoning held up.
+- **One gap I fixed:** the page builds a database filter string (`.or(...)`) from the user id in the address. The page checked the id's format, but the data function trusted it. Now the function checks too, so nothing can sneak commas or brackets into the filter later.
+- I also removed a duplicate "Invite a classmate" button from the empty People page.
+
+**Caught:**
+- **"Undo" would have quietly reset a book's status.** Removing a book and tapping Undo saves it again, which would have come back as "Want to read". Undo now restores the status it had.
+- **The friends test found the post twice** on A's page. Next 16 keeps the page you came from in the DOM, hidden, so the Back button is instant, and the hidden feed had the same post. That was a test problem, not an app problem: the locator now matches visible posts only.
+- The full suite was green three runs in a row, and the database was left clean afterwards (no friendships, likes, comments, posts or books from the test readers).
+
+**The fresh reviewer's findings** (it found no way to read or change someone else's data). Each one checked against the code before acting:
+1. **A forged book could spread into a friend's library.** The app only lets you post about a book from your own library, but the database didn't check that. Someone using the Data API directly could post a real book's key with a made-up title or cover, and "Save book" would copy it into a friend's private library. **Fixed in the database:** the posts insert policy now requires an exact match with a row in your own library. I checked it before and after: all four forgeries went through before the fix and were refused after it (42501), while real posts, including books with no author or cover, still work.
+2. **Changing a status while a filter was on made the book vanish** and dropped keyboard focus. Changed books now stay in view until you pick another filter.
+3. **Focus could fall to nowhere** after opening a person's page, because a placeholder heading is replaced when the page loads. Feed and Me had the same problem. Fixed once in `RouteFocus`, which now follows the heading when it's replaced (and only then).
+4. **Picked statuses were never cleared**, so a status changed on another device could stay stale until a reload. They now use `useOptimistic`, which drops them once the save finishes.
+5. **A filter left on could hide a book you'd just saved.** Saving a new book now switches back to All.
+6. **The test waited for "any POST"**, and Clerk POSTs in the background. I had already caught and fixed this one: the friends test went red once on "status was saved". It now waits for the Server Action's reply specifically (the `next-action` header).
+7. **Test gaps:** the badge check also matched "11 friend requests" (tightened). In a red run, the privacy test stopped at its first leak, so the new check on A's page never ran. The privacy checks are now soft, so a red run reports every place B could see A's post.
+8. **"In your library" was a small tap target.** It's now the same size as Like and Comment.
+
+**Also caught:** the Supabase MCP server refused the first version of the fix, again with "Invalid or expired requestState", because it contained `drop policy`. I didn't look for a way around the refusal. The same change written as `alter policy` is atomic (posts never has a moment with no insert rule), so it's the better statement anyway, and it went through.
+
+**Not done, and worth knowing:** the red/green demo hasn't been re-run to watch the new check on A's page fail. Last time the loosened policy showed a test post to real accounts, so that waits until I ask for it.
+
+## Write page · the book picker starts folded
+
+I asked for "Add a book from your library" to be collapsed by default. It's now a button that opens the list. Once a book is picked, the button shows which one. It starts open when you arrive from a book's "Post about it" link, and opens itself if there's a problem with the book you picked.

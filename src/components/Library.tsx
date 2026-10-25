@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { removeBook, saveBook } from "@/lib/actions";
-import type { Book } from "@/lib/books";
+import { useOptimistic, useRef, useState, useTransition } from "react";
+import { removeBook, saveBook, setReadingStatus } from "@/lib/actions";
+import { READING_STATUSES, isReadingStatus, type Book, type ReadingStatus } from "@/lib/books";
 import type { LibraryItem } from "@/lib/database.types";
 import { BookRow } from "./books";
 import { Banner, Button, ButtonLink, Field, Toast, plural, useToast } from "./ui";
@@ -19,8 +19,13 @@ function toBook(item: LibraryItem): Book {
   return { olKey: item.ol_key, title: item.title, author: item.author, coverId: item.cover_id, year: item.year };
 }
 
+// The status saved in the database, or "want to read" if it's ever unexpected
+function statusOf(item: LibraryItem): ReadingStatus {
+  return isReadingStatus(item.status) ? item.status : "want";
+}
+
 // The Library tab: search Open Library, save books, and see the books you've
-// saved. Search goes through our /api/books proxy and has its own states
+// saved, each marked Want to read, Reading or Finished. Search goes through our /api/books proxy and has its own states
 // (searching, nothing found, Open Library down, signed out). Your saved books
 // come from Supabase, so they still show when search is down.
 export function Library({ items }: { items: LibraryItem[] }) {
@@ -33,6 +38,27 @@ export function Library({ items }: { items: LibraryItem[] }) {
   const input = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
   const inFlight = useRef<AbortController | null>(null);
   const savedKeys = new Set(items.map((i) => i.ol_key));
+  // Which books to list: all, or one reading status
+  const [filter, setFilter] = useState<ReadingStatus | "all">("all");
+  // Books whose status you changed while this filter was on. They stay in
+  // the list until you pick another filter, so the menu you're using doesn't
+  // vanish (and take keyboard focus with it) the moment you change it.
+  const [kept, setKept] = useState<Set<string>>(() => new Set());
+  // Statuses just picked, shown straight away while the server saves them.
+  // useOptimistic drops them once the save (and its refresh) has finished, so
+  // they can't go stale or outlive a newer pick.
+  const [, startTransition] = useTransition();
+  const [picked, pick] = useOptimistic(
+    {} as Record<string, ReadingStatus>,
+    (current, change: { id: string; status: ReadingStatus }) => ({ ...current, [change.id]: change.status }),
+  );
+  const status = (item: LibraryItem) => picked[item.id] ?? statusOf(item);
+  const shown = filter === "all" ? items : items.filter((i) => status(i) === filter || kept.has(i.id));
+
+  function showOnly(next: ReadingStatus | "all") {
+    setFilter(next);
+    setKept(new Set());
+  }
 
   function mark(key: string, on: boolean) {
     setBusy((s) => {
@@ -77,11 +103,24 @@ export function Library({ items }: { items: LibraryItem[] }) {
     run(q);
   }
 
-  async function save(book: Book) {
+  async function save(book: Book, status?: ReadingStatus) {
     mark(book.olKey, true);
-    const result = await saveBook(book);
+    const result = await saveBook(book, status);
     mark(book.olKey, false);
+    // A newly saved book is Want to read; show everything so it isn't hidden
+    // behind another filter and doesn't look like the save failed
+    if (result.ok && !status) showOnly("all");
     showToast(result.ok ? `Saved ${book.title}` : result.error);
+  }
+
+  function changeStatus(item: LibraryItem, next: ReadingStatus) {
+    if (filter !== "all") setKept((k) => new Set(k).add(item.id));
+    startTransition(async () => {
+      pick({ id: item.id, status: next });
+      const result = await setReadingStatus(item.id, next);
+      // On failure the old status comes back by itself; say why
+      if (!result.ok) showToast(result.error);
+    });
   }
 
   async function remove(item: LibraryItem) {
@@ -93,7 +132,7 @@ export function Library({ items }: { items: LibraryItem[] }) {
       label: "Undo",
       onClick: () => {
         hideToast();
-        save(toBook(item));
+        save(toBook(item), status(item));
       },
     });
   }
@@ -140,10 +179,53 @@ export function Library({ items }: { items: LibraryItem[] }) {
           </div>
         ) : (
           <>
-            <p className="text-[15px] text-muted">Only you can see these.</p>
+            <p className="text-[15px] text-muted">Only you can see these, including what you&apos;re reading.</p>
+            <div role="group" aria-label="Show" className="flex flex-wrap gap-2 py-2">
+              {([{ value: "all", label: "All" }, ...READING_STATUSES] as const).map((s) => {
+                const count = s.value === "all" ? items.length : items.filter((i) => status(i) === s.value).length;
+                return (
+                  <button
+                    key={s.value}
+                    type="button"
+                    aria-pressed={filter === s.value}
+                    onClick={() => showOnly(s.value)}
+                    className={`min-h-11 cursor-pointer rounded-full border px-4 text-[15px] ${
+                      filter === s.value ? "border-ink bg-ink text-paper" : "border-line bg-surface hover:bg-hover"
+                    }`}
+                  >
+                    {s.label} <span className={filter === s.value ? "" : "text-muted"}>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {shown.length === 0 && (
+              <p className="py-4 text-muted">
+                Nothing marked {READING_STATUSES.find((s) => s.value === filter)?.label} yet. Change a book&apos;s status
+                under its title.
+              </p>
+            )}
             <ul>
-              {items.map((item) => (
-                <BookRow key={item.id} book={toBook(item)}>
+              {shown.map((item) => (
+                <BookRow
+                  key={item.id}
+                  book={toBook(item)}
+                  below={
+                    <label className="mt-2 inline-flex">
+                      <span className="sr-only">Reading status for {item.title}</span>
+                      <select
+                        value={status(item)}
+                        onChange={(e) => changeStatus(item, e.target.value as ReadingStatus)}
+                        className="min-h-11 cursor-pointer rounded-full border border-line bg-surface px-3 text-[15px] hover:bg-hover"
+                      >
+                        {READING_STATUSES.map((s) => (
+                          <option key={s.value} value={s.value}>
+                            {s.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  }
+                >
                   <ButtonLink href={`/post/new?book=${encodeURIComponent(item.ol_key)}`} variant="quiet">
                     Post about it<span className="sr-only"> {item.title}</span>
                   </ButtonLink>

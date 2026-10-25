@@ -1,10 +1,11 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { Literata } from "next/font/google";
-import { Suspense } from "react";
+import { Suspense, cache } from "react";
 import { NavBar, RouteFocus, TabBar } from "@/components/NavBar";
 import { PasskeyPrompt } from "@/components/PasskeyPrompt";
 import { ProfileSync } from "@/components/ProfileSync";
+import { getPendingRequestCount } from "@/lib/data";
 import "./globals.css";
 
 const literata = Literata({ subsets: ["latin"], style: ["normal", "italic"], variable: "--font-literata" });
@@ -31,6 +32,21 @@ const clerkAppearance = {
   },
 };
 
+// Friend requests waiting on you, for the badge on the People tab. It reads
+// the session, so each nav starts it inside its own Suspense boundary (not at
+// the top of the layout, which would hold up the whole page), and cache()
+// lets the top and bottom navs share one query per request. Server Actions
+// call refresh(), which re-renders this, so Accept and Decline update it.
+const pendingRequests = cache(getPendingRequestCount);
+
+function TopNav() {
+  return <NavBar requests={pendingRequests()} />;
+}
+
+function BottomNav() {
+  return <TabBar requests={pendingRequests()} />;
+}
+
 // The nav reads the current path, which a catch-all route (like Clerk's
 // sign-in) only knows at request time, so it sits in Suspense.
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -39,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col pb-[calc(3.5rem+env(safe-area-inset-bottom))] font-sans sm:pb-0">
         <ClerkProvider appearance={clerkAppearance}>
           <Suspense>
-            <NavBar />
+            <TopNav />
           </Suspense>
           <main id="main" tabIndex={-1} className="mx-auto w-full max-w-2xl flex-1 px-4 py-6 sm:py-8">
             <PasskeyPrompt />
@@ -54,7 +70,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </p>
           </footer>
           <Suspense>
-            <TabBar />
+            <BottomNav />
             <RouteFocus />
           </Suspense>
         </ClerkProvider>

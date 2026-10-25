@@ -32,7 +32,8 @@ export function BookCover({ book }: { book: Book }) {
 
 // One book in a list: cover, title, author and year, and an action on the
 // right (Save, Saved, or Post about it and Remove).
-export function BookRow({ book, children }: { book: Book; children?: React.ReactNode }) {
+// below: shown under the title and author, e.g. your reading status
+export function BookRow({ book, below, children }: { book: Book; below?: React.ReactNode; children?: React.ReactNode }) {
   const details = [book.author ?? "Unknown author", book.year].filter(Boolean).join(" · ");
   return (
     <li className="flex items-center gap-4 border-b border-rule py-4">
@@ -40,6 +41,7 @@ export function BookRow({ book, children }: { book: Book; children?: React.React
       <div className="min-w-0 flex-1">
         <p className="break-words text-[17px] font-semibold leading-snug">{book.title}</p>
         <p className="mt-0.5 text-[15px] text-muted">{details}</p>
+        {below}
       </div>
       {children && <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">{children}</div>}
     </li>

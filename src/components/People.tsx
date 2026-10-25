@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { acceptFriendRequest, removeFriendship, sendFriendRequest, type ActionResult } from "@/lib/actions";
 import type { Person } from "@/lib/data";
@@ -45,7 +46,8 @@ export function People({ people }: { people: Person[] }) {
       <div className="rounded-2xl border border-dashed border-line p-5">
         <p className="font-bold">You&apos;re the first one here</p>
         <p className="mt-1 text-muted">
-          Send a classmate the link to kinnect. Once they sign up, they&apos;ll show up here and you can add each other.
+          Use Invite a classmate above to send them the link. Once they sign up, they&apos;ll show up here and you can add
+          each other.
         </p>
       </div>
     );
@@ -169,7 +171,14 @@ function PersonRow({ person, children }: { person: Person; children: React.React
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-rule py-4">
       <Avatar name={person.name} avatar={person.avatar} />
-      <p className="min-w-0 flex-1 break-words text-[17px] font-semibold">{person.name}</p>
+      <p className="min-w-0 flex-1 break-words text-[17px] font-semibold">
+        <Link
+          href={`/people/${person.userId}`}
+          className="inline-flex min-h-11 items-center underline decoration-line underline-offset-4 hover:decoration-ink"
+        >
+          {person.name}
+        </Link>
+      </p>
       <div className="flex items-center gap-1">{children}</div>
     </li>
   );
