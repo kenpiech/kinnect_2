@@ -164,3 +164,39 @@ How the CLI works: `clerk auth login` (in my terminal) saves a token in the macO
 | `.env.local` (gitignored) | Clerk publishable and secret keys, plus the sign-in/up route settings | — (the agent never read it) |
 
 **In one sentence:** `clerk init` installed Clerk's SDK, added a proxy that identifies every request, a provider that shares sign-in state with the UI, catch-all sign-in and sign-up pages, and fetched my dev keys into `.env.local`. It left every route public and broke the build, and catching and fixing that was my job.
+
+## Step 5 · Data in Supabase
+
+**Setup (me, in the dashboards):** created the `kinnect` project (Free, East US, GitHub login), added the Supabase URL and publishable key to `.env.local` by hand, activated Clerk's Supabase integration (adds `"role": "authenticated"` to Clerk session tokens), and added Clerk under Supabase → Third-Party Auth (Supabase now trusts tokens signed by my Clerk instance, checked against Clerk's public keys). Project settings: Data API **on**, "Automatically expose new tables" **off**, automatic RLS **on**.
+
+**MCP:** the agent's Supabase connector is limited to this one project (`project_ref=…`) and to the database, docs, debugging and development tools. I approved it with a browser login, so the agent never handled a Supabase token.
+
+**What got built:**
+- Two migrations, saved in `supabase/migrations/`: the four tables with RLS policies and grants, then fixes from Supabase's advisors.
+- `src/lib/supabase.ts`: a server-side client per request whose `accessToken` is my Clerk session token.
+- `src/lib/data.ts`: server-only reads. `ensureProfile()` creates my profile on first sign-in, and `ProfileSync` runs it from the layout.
+- Installed only `@supabase/supabase-js`.
+
+**Two locks on every table:**
+1. **Grants:** may this role touch the table at all? Only `authenticated` gets grants, and only for what the app does. `anon` gets nothing.
+2. **RLS policies:** which rows? Keyed on `sub` (my Clerk user ID) from the token.
+
+**Checked (simulated users in a transaction that was rolled back):** Bob sees both profiles but only his own library. Bob can't see Alice's post until she **accepts** his request (pending isn't enough). Bob can't accept his own request. After accepting, both see both posts, but **neither sees the other's library**. Bob can't delete Alice's post. After Bob removes the friendship, her post disappears for him again. A non-Clerk token sees nothing. Then the attacks, each refused:
+
+| Attempt | Result |
+|---|---|
+| Signed out, read any table, over the internet with only the public key | `permission denied` (no grant) |
+| Accept a request **and** rewrite `requester_id` (forge a friendship) | `permission denied` (only `status` is updatable) |
+| Bob inserts a post with `user_id` = Alice | `violates row-level security policy` |
+| Bob creates an already-`accepted` friendship | `violates row-level security policy` |
+
+**End to end:** I signed in and opened Feed, and my profile row appeared as "Ken Piech" under my Clerk user ID. That proves the chain: Clerk token → Supabase verifies the signature → issuer check → RLS lets me insert my own row, with `user_id` filled in from the token, not from the app.
+
+**Caught:**
+- **Supabase's setup page said to install `@supabase/ssr` too.** That package manages *Supabase Auth* sessions in cookies. Kinnect signs in with Clerk, so it would have been an unused second session system. Installed only `@supabase/supabase-js`.
+- **Supabase trusts its own sign-in, not just Clerk.** Anyone with the publishable key could have created a Supabase Auth account, skipped Clerk, and been "authenticated", able to read every profile. Added a **restrictive** policy on every table that only accepts tokens issued by my Clerk instance (`iss`). Tested: such a token sees nothing.
+- **Accepting a request could have forged a friendship.** A policy alone can't stop an UPDATE from changing other columns, so the addressee could have set `requester_id` to anyone and read their posts. Fixed with column-level grants: only `friendships.status` and `profiles.display_name` can be updated.
+- **The security advisor flagged a function Supabase itself created.** "Enable automatic RLS" added `rls_auto_enable()` as SECURITY DEFINER in the public schema, callable by anyone at `/rest/v1/rpc/rls_auto_enable`. Revoked it in a second migration. The advisor is now clean, and auto-RLS still works (tested on a throwaway table).
+- **Postgres's error hint suggests the dangerous fix.** For a signed-out read, it says `GRANT SELECT ON public.posts TO anon`. Following that would make every post public. The error is the lock working.
+- **17 "performance" warnings were false positives.** The linter wants `(select auth.jwt())`, and we wrote `(select auth.jwt()->>'sub')`. `EXPLAIN` showed Postgres computes it once per query (an InitPlan) and uses the index, so I left them.
+- **Clerk deprecation:** `createRouteMatcher` is going away, partly because `/sign-in(.*)` also matches look-alike paths like `/sign-inxyz`. Harmless today, since no such routes exist. Saved for the step 10 security review.

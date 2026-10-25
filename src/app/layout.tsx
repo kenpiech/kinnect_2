@@ -4,6 +4,7 @@ import { Literata } from "next/font/google";
 import { Suspense } from "react";
 import { NavBar, RouteFocus, TabBar } from "@/components/NavBar";
 import { PasskeyPrompt } from "@/components/PasskeyPrompt";
+import { ProfileSync } from "@/components/ProfileSync";
 import { Session } from "@/components/Session";
 import "./globals.css";
 
@@ -44,6 +45,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <main id="main" tabIndex={-1} className="mx-auto w-full max-w-2xl flex-1 px-4 py-6 sm:py-8">
             <Session />
             <PasskeyPrompt />
+            <Suspense>
+              <ProfileSync />
+            </Suspense>
             {children}
           </main>
           <footer className="border-t border-rule">
