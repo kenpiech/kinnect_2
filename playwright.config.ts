@@ -5,8 +5,9 @@ import { defineConfig, devices } from "@playwright/test";
 // test process without anyone opening the file.
 loadEnvConfig(process.cwd());
 
-// One end-to-end test (tests/privacy.spec.ts) that proves two lib2 users
-// can't see each other's data. It runs against the local dev server, signed
+// End-to-end tests: tests/privacy.spec.ts proves two lib2 users who aren't
+// friends can't see each other's data; tests/likes-comments.spec.ts checks
+// likes and comments between friends. It runs against the local dev server, signed
 // in as two Clerk test users. Run: npm run test:e2e
 export default defineConfig({
   testDir: "./tests",
@@ -18,6 +19,10 @@ export default defineConfig({
   reporter: [["list"]],
   use: {
     baseURL: "http://localhost:3000",
+    // A stuck click fails in 15 s instead of using up the whole test, so each
+    // test's cleanup (in finally) still has time to run
+    actionTimeout: 15_000,
+    navigationTimeout: 30_000,
     trace: "retain-on-failure",
     ...devices["Desktop Chrome"],
   },

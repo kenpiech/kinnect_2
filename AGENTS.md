@@ -28,11 +28,12 @@ A small social network for classmates who read: save books to your library, add 
 - **Library tab:** search Open Library and save books. Your library is private, even from friends.
 - **People tab:** list and search other users. Request, Accept and Remove (Remove also covers decline, cancel and unfriend).
 - **Posts:** up to 280 characters, optionally about one book from your library. Your feed shows your posts and your accepted friends' posts, newest first.
+- **Likes and comments** (`src/components/PostFooter.tsx`): one like per person per post (optimistic heart), and comments up to 280 characters, oldest first. You can delete your own comment, and a post's author can delete any comment on it. A comment is visible to everyone who can see the post, and the comment box says so.
 - **Tabs:** Feed · Library · People · Me.
 - **Avatars are required.** Everyone picks one of 19 drawn avatars (13 readers plus a ninja, wizard, viking, detective, pilot and polar bear) (`public/avatars/readers`, drawn by `scripts/reader_avatars.py`; keys in `src/lib/avatars.ts` and the `profiles.avatar` check). Until they do, `ProfileSync` shows `AvatarGate`, a modal `<dialog>` that Escape can't close. They can change it on Me. Avatars show on posts, People and Me. Initials are only a fallback.
 
 ## Data model
-Four tables in Supabase. Every ID that names a person is a **Clerk user ID** (`text`), and columns that record "who did this" default to `auth.jwt()->>'sub'`. Below, **me** means `auth.jwt()->>'sub'`.
+Six tables in Supabase. Every ID that names a person is a **Clerk user ID** (`text`), and columns that record "who did this" default to `auth.jwt()->>'sub'`. Below, **me** means `auth.jwt()->>'sub'`.
 
 | Table | Columns | Who can do what (RLS) |
 |---|---|---|
@@ -40,7 +41,10 @@ Four tables in Supabase. Every ID that names a person is a **Clerk user ID** (`t
 | `library_items` | `id`, `user_id`, `ol_key` (e.g. `/works/OL27482W`), `title`, `author`, `cover_id` and `year` (all three nullable), `added_at`; unique (`user_id`, `ol_key`) | **read/insert/delete:** own rows only. Private, even from friends. |
 | `friendships` | `id`, `requester_id`, `addressee_id`, `status` (`pending` or `accepted`), `created_at`; one row per pair of people | **read:** either person. **insert:** requester is me, status `pending`. **update:** addressee is me (to accept). **delete:** either person. |
 | `posts` | `id`, `user_id`, `body` (1–280 chars), `book_ol_key`, `book_title`, `book_author` (all nullable), `created_at` | **read:** my posts, or posts by someone I have an **accepted** friendship with. **insert/delete:** own only. |
+| `post_likes` | `post_id`, `user_id`, `created_at`; primary key (`post_id`, `user_id`) | **read:** likes on posts I can see. **insert:** as me, on a post I can see. **delete:** my own like. |
+| `post_comments` | `id`, `post_id`, `user_id`, `body` (1–280 chars), `created_at` | **read:** comments on posts I can see. **insert:** as me, on a post I can see. **delete:** my own comment, or any comment on my post. |
 
+- **Likes and comments follow their post.** Their policies say "a post I can see" as `exists (select 1 from posts …)`, which runs under the posts read policy, so who sees a post is defined in one place. Never copy the friendship check into them. Both cascade when the post is deleted, and neither can be updated. Because `post_likes` links posts to profiles a second way, a post's author is embedded as `profiles!posts_user_id_fkey`.
 - **A post copies the book's details** instead of pointing at a `library_items` row. Friends can't read your library, so a link would show up broken for them.
 - **A profile is created on first sign-in** (an upsert from the Clerk name). No webhook.
 - **RLS is on for every table, and the `anon` role has no policies.** Never turn RLS off, never add a `using (true)` read policy (except the deliberate test break, which is reverted), and never use the Supabase secret/service-role key in the app.
@@ -56,7 +60,8 @@ Four tables in Supabase. Every ID that names a person is a **Clerk user ID** (`t
 - **Open Library is called from the server,** through `/api/books?q=`, which proxies `https://openlibrary.org/search.json` with `fields=key,title,author_name,first_publish_year,cover_i&limit=20`. It sends a User-Agent naming Kinnect and its repo URL (as Open Library asks; never the user's email), caches each search for an hour with `"use cache"` and `cacheLife("hours")`, and times out after 8 s. Searches took 1.8–6.1 s in testing, so the page says "Still searching" after 2.5 s. Book types live in `src/lib/books.ts`, and the database types in `src/lib/database.types.ts`, which is regenerated after each migration. Covers load in the browser from `https://covers.openlibrary.org/b/id/<cover_id>-M.jpg`.
 - **Open Library states:** loading, nothing found (`numFound: 0` is a 200, not an error), unavailable (timeout or non-200, with retry), and empty library. When search is down, your saved library still shows, since it comes from Supabase. Empty searches are never sent. `cover_i` and `first_publish_year` can be missing or wrong, so the UI never depends on them.
 
-## The privacy test
+## The end-to-end tests
+- `tests/likes-comments.spec.ts` makes the two test readers friends for a few seconds (A posts, B likes and comments, A deletes the comment, B unlikes), then deletes the post and unfriends them, pass or fail. If a run is killed mid-way, they can be left as friends, and the privacy test then fails. Check `friendships` before trusting a privacy failure. Clicks time out after 15 s, so cleanup normally gets to run.
 - `tests/privacy.spec.ts` (Playwright, run with `npm run test:e2e` against the local dev server): Reader A saves a book and posts about it, and Reader B, **not A's friend**, must see neither in B's own feed or library. It cleans up A's post and book afterwards, pass or fail.
 - The readers are Clerk **test users** (`lib2-reader-a/b+clerk_test@example.com`, created by `tests/global.setup.ts`). They sign in with a Clerk sign-in token, so no email or code is involved, and they show up on People as "Test Reader A/B".
 - `playwright.config.ts` loads `.env.local` with `@next/env` (as `next dev` does), so nobody reads the file. `global.setup.ts` imports `@clerk/backend`, which comes with `@clerk/nextjs` and isn't a new dependency.

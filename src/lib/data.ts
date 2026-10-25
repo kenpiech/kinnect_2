@@ -1,5 +1,6 @@
 import "server-only";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import type { QueryData } from "@supabase/supabase-js";
 import type { LibraryItem } from "./database.types";
 import { supabase } from "./supabase";
 
@@ -100,6 +101,17 @@ export async function getPeople(): Promise<Person[] | null> {
     });
 }
 
+export type PostComment = {
+  id: string;
+  body: string;
+  createdAt: string;
+  authorName: string;
+  authorAvatar: string | null;
+  mine: boolean;
+  // Your own comment, or any comment on your post
+  canDelete: boolean;
+};
+
 export type FeedPost = {
   id: string;
   body: string;
@@ -109,7 +121,53 @@ export type FeedPost = {
   authorName: string;
   authorAvatar: string | null;
   mine: boolean;
+  // Whether you liked it, and the names of everyone else who did
+  likes: { mine: boolean; others: string[] };
+  // Oldest first, like a conversation
+  comments: PostComment[];
 };
+
+// A post with its author, likes and comments, in one request. The likes and
+// comments come back only for posts you can see: their policies reuse the
+// posts read policy. The author needs the !posts_user_id_fkey hint because
+// post_likes also links posts to profiles (as "people who liked it").
+const POST_FIELDS = `id, body, book_title, book_author, created_at, user_id,
+  author:profiles!posts_user_id_fkey(display_name, avatar),
+  post_likes(user_id, profiles(display_name)),
+  post_comments(id, body, created_at, user_id, profiles(display_name, avatar))`;
+
+type Db = Awaited<ReturnType<typeof supabase>>;
+const postQuery = (db: Db) => db.from("posts").select(POST_FIELDS);
+type PostRow = QueryData<ReturnType<typeof postQuery>>[number];
+
+function toFeedPost(p: PostRow, userId: string): FeedPost {
+  const mine = p.user_id === userId;
+  return {
+    id: p.id,
+    body: p.body,
+    bookTitle: p.book_title,
+    bookAuthor: p.book_author,
+    createdAt: p.created_at,
+    authorName: p.author?.display_name ?? "A classmate",
+    authorAvatar: p.author?.avatar ?? null,
+    mine,
+    likes: {
+      mine: p.post_likes.some((l) => l.user_id === userId),
+      others: p.post_likes.filter((l) => l.user_id !== userId).map((l) => l.profiles?.display_name ?? "A classmate"),
+    },
+    comments: p.post_comments
+      .toSorted((a, b) => a.created_at.localeCompare(b.created_at))
+      .map((c) => ({
+        id: c.id,
+        body: c.body,
+        createdAt: c.created_at,
+        authorName: c.profiles?.display_name ?? "A classmate",
+        authorAvatar: c.profiles?.avatar ?? null,
+        mine: c.user_id === userId,
+        canDelete: c.user_id === userId || mine,
+      })),
+  };
+}
 
 // Your feed: your posts and your accepted friends' posts, newest first. No
 // author filter: the "read mine and my friends' posts" policy decides whose
@@ -120,11 +178,7 @@ export async function getFeed(): Promise<{ posts: FeedPost[]; friendCount: numbe
   if (!userId) return null;
   const db = await supabase();
   const [posts, friends] = await Promise.all([
-    db
-      .from("posts")
-      .select("id, body, book_title, book_author, created_at, user_id, profiles(display_name, avatar)")
-      .order("created_at", { ascending: false })
-      .limit(100),
+    postQuery(db).order("created_at", { ascending: false }).limit(100),
     db.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted"),
   ]);
   if (posts.error || friends.error) {
@@ -134,16 +188,7 @@ export async function getFeed(): Promise<{ posts: FeedPost[]; friendCount: numbe
   return {
     readAt: Date.now(),
     friendCount: friends.count ?? 0,
-    posts: posts.data.map((p) => ({
-      id: p.id,
-      body: p.body,
-      bookTitle: p.book_title,
-      bookAuthor: p.book_author,
-      createdAt: p.created_at,
-      authorName: p.profiles?.display_name ?? "A classmate",
-      authorAvatar: p.profiles?.avatar ?? null,
-      mine: p.user_id === userId,
-    })),
+    posts: posts.data.map((p) => toFeedPost(p, userId)),
   };
 }
 
@@ -165,11 +210,7 @@ export async function getMe(): Promise<{
   // don't stand in for a policy.
   const [profile, posts, friends, books] = await Promise.all([
     db.from("profiles").select("display_name, avatar").eq("user_id", userId).maybeSingle(),
-    db
-      .from("posts")
-      .select("id, body, book_title, book_author, created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false }),
+    postQuery(db).eq("user_id", userId).order("created_at", { ascending: false }),
     db.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted"),
     db.from("library_items").select("id", { count: "exact", head: true }),
   ]);
@@ -186,15 +227,6 @@ export async function getMe(): Promise<{
     readAt: Date.now(),
     friendCount: friends.count ?? 0,
     bookCount: books.count ?? 0,
-    posts: (posts.data ?? []).map((p) => ({
-      id: p.id,
-      body: p.body,
-      bookTitle: p.book_title,
-      bookAuthor: p.book_author,
-      createdAt: p.created_at,
-      authorName: name,
-      authorAvatar: avatar,
-      mine: true,
-    })),
+    posts: (posts.data ?? []).map((p) => toFeedPost(p, userId)),
   };
 }

@@ -1,27 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { deletePost } from "@/lib/actions";
+import type { ActionResult } from "@/lib/actions";
 import { Button } from "./ui";
 
-// Delete on your own posts, with a second tap to confirm, since there's no undo.
-export function DeletePost({ id }: { id: string }) {
+// Delete for a post or a comment, with a second tap to confirm, since there's
+// no undo. `what` finishes the screen-reader label ("Delete this post").
+export function ConfirmDelete({ what, remove }: { what: string; remove: () => Promise<ActionResult> }) {
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function remove() {
+  async function confirm() {
     setBusy(true);
-    const result = await deletePost(id);
+    const result = await remove();
     setBusy(false);
     if (!result.ok) setError(result.error);
   }
 
   return (
-    <div className="mt-2 -ml-2 flex flex-wrap items-center gap-1">
+    <span className="flex flex-wrap items-center gap-1">
       {confirming ? (
         <>
-          <Button variant="secondary" className="min-h-9" disabled={busy} onClick={remove}>
+          <Button variant="secondary" className="min-h-9" disabled={busy} onClick={confirm}>
             {busy ? "Deleting…" : "Yes, delete"}
           </Button>
           <Button variant="quiet" className="min-h-9" disabled={busy} onClick={() => setConfirming(false)}>
@@ -30,14 +31,14 @@ export function DeletePost({ id }: { id: string }) {
         </>
       ) : (
         <Button variant="quiet" className="min-h-9 text-[14px] text-muted" onClick={() => setConfirming(true)}>
-          Delete<span className="sr-only"> this post</span>
+          Delete<span className="sr-only"> {what}</span>
         </Button>
       )}
       {error && (
-        <p role="alert" className="text-[15px] text-danger">
+        <span role="alert" className="text-[15px] text-danger">
           {error}
-        </p>
+        </span>
       )}
-    </div>
+    </span>
   );
 }

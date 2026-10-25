@@ -366,3 +366,26 @@ The policy was loose for under a minute. After restoring, Postgres confirmed the
 - The privacy test still passes after the cleanup. It walks through Write, Feed, Me and Library, so it doubles as a regression check.
 
 **Caught: the red demo leaked to a real user.** While the posts policy was loosened, *I* saw Test Reader A's "private" post in my own feed on the live site. `using (true)` didn't just fail the test; it exposed every post to every signed-in account, real ones included, because the test and the app share one database. For a real product, that demo belongs on a separate test database (a second Supabase project or a branch), never production.
+
+## Feature · Likes and comments
+
+**What:** a heart under every post (tap to like, tap again to take it back, with "Liked by You and Sam" underneath) and comments up to 280 characters. You can delete your own comment, and the author of a post can delete any comment on it.
+
+**The rule, in the database** (`supabase/migrations/likes_and_comments.sql`): **if you can see the post, you can see its likes and comments and add your own; if you can't, they don't exist for you.** The policies say "can see the post" as `exists (select 1 from posts where id = post_id)`. That subquery runs as the signed-in person, so the posts read policy ("mine and my friends'") filters it. Who sees a post is defined once, and likes and comments reuse it instead of copying the friendship check. If the friendship check ever changes, likes and comments follow automatically.
+
+- Two new tables: `post_likes` (one row per person per post, enforced by its primary key) and `post_comments`. Both cascade when the post is deleted.
+- **No updates are granted**, so likes and comments can be added and removed but never edited.
+- Each table has the restrictive Clerk-issuer policy, like every other table.
+
+**Checked in the database** with three made-up people (A and B friends, C a stranger), all rolled back: B can like and comment on A's post; B is refused (42501) on C's post, and when liking "as A"; C sees 0 likes and 0 comments on A's post; A sees B's like and comment; a non-Clerk token and a signed-out visitor see nothing. The security advisor is clean.
+
+**Checked in the browser** (`tests/likes-comments.spec.ts`): A and B become friends, A posts, B likes and comments, A sees "Liked by Test Reader B" and deletes B's comment, B takes the like back. Then the post and the friendship are removed. Green three runs in a row, together with the privacy test.
+
+**A privacy choice to know about:** a comment is seen by everyone who can see the post. If Sam comments on my post, my other friends see Sam's comment even if they aren't Sam's friends. That's how most social apps work, and the comment box says so: "Everyone who can see this post can see your comment."
+
+**Caught:**
+- **The new test broke the old one.** The first run hung on a click until the 2-minute limit, which closed the browser before cleanup could unfriend the two test readers. The next privacy run then found them friends, and B "saw A's private post". That was correct for friends, but the test failed. Clicks now time out after 15 s, so cleanup always gets to run. I also removed the leftover friendship.
+- **Cleanup skipped the unfriend step** because it counted the Remove buttons before the People list had streamed in. That's the same trap as `isVisible()` in step 7: `count()` doesn't wait. It now waits for the list first.
+- **The heart lies for a moment, on purpose.** It turns red the instant you tap, before the server has saved anything (an "optimistic" update). The test reloaded right after tapping and sometimes cut off the save. A person tapping and leaving immediately could do the same, which is acceptable for a like. The test now waits for the server's reply.
+- **Supabase couldn't tell which link to follow.** `post_likes` connects posts to profiles a second way ("people who liked it"), so asking for a post's `profiles` became ambiguous. The query names the link: `profiles!posts_user_id_fkey`.
+- The Supabase MCP server refused my test block when it contained `delete`/`update` statements, with "Invalid or expired requestState". It looks like a confirmation step that never reached the user. I didn't try to get around it: the delete rules are covered by the browser test instead (the author removing a comment, B taking back a like).

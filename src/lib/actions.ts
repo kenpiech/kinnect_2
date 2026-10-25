@@ -202,6 +202,85 @@ export async function deletePost(postId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
+// Likes and comments only work on posts you can see. If the post was deleted
+// or its author unfriended you, the policies refuse the write (42501) or the
+// post is gone (23503), and both get the same plain message.
+const POST_GONE: ActionResult = { ok: false, error: "That post isn't available anymore. Reload to see your feed." };
+
+export async function likePost(postId: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof postId !== "string" || !UUID.test(postId)) return POST_GONE;
+
+  const db = await supabase();
+  // user_id fills itself in from the session token
+  const { error } = await db.from("post_likes").insert({ post_id: postId });
+  // 23505: already liked, which is what you wanted
+  if (error?.code === "42501" || error?.code === "23503") return POST_GONE;
+  if (error && error.code !== "23505") {
+    console.error("Couldn't like post:", error.message);
+    return { ok: false, error: "Couldn't like it. Try again." };
+  }
+  refresh();
+  return { ok: true };
+}
+
+export async function unlikePost(postId: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof postId !== "string" || !UUID.test(postId)) return POST_GONE;
+
+  const db = await supabase();
+  // Names the post, not the person: the "unlike" policy only lets this delete
+  // my own like, never someone else's
+  const { error } = await db.from("post_likes").delete().eq("post_id", postId);
+  if (error) {
+    console.error("Couldn't unlike post:", error.message);
+    return { ok: false, error: "Couldn't take back your like. Try again." };
+  }
+  refresh();
+  return { ok: true };
+}
+
+export async function addComment(input: { postId: string; body: string }): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof input?.postId !== "string" || !UUID.test(input.postId)) return POST_GONE;
+
+  const body = typeof input.body === "string" ? input.body.trim() : "";
+  if (!body) return { ok: false, error: "Write something first." };
+  const length = postLength(body);
+  if (length > MAX_POST) return { ok: false, error: `Keep it to ${MAX_POST} characters. You're ${length - MAX_POST} over.` };
+
+  const db = await supabase();
+  // user_id fills itself in; the policy checks you can see the post
+  const { error } = await db.from("post_comments").insert({ post_id: input.postId, body });
+  if (error?.code === "42501" || error?.code === "23503") return POST_GONE;
+  if (error) {
+    console.error("Couldn't add comment:", error.message);
+    return { ok: false, error: "Couldn't post your comment. Try again." };
+  }
+  refresh();
+  return { ok: true };
+}
+
+export async function deleteComment(commentId: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof commentId !== "string" || !UUID.test(commentId)) return { ok: false, error: "Couldn't find that comment. Reload and retry." };
+
+  const db = await supabase();
+  // Only your own comment, or one on your post, matches the delete policy;
+  // anything else deletes nothing
+  const { error } = await db.from("post_comments").delete().eq("id", commentId);
+  if (error) {
+    console.error("Couldn't delete comment:", error.message);
+    return { ok: false, error: "Couldn't delete it. Try again." };
+  }
+  refresh();
+  return { ok: true };
+}
+
 // The name classmates see on People and on your posts
 export async function updateDisplayName(name: string): Promise<ActionResult> {
   const { userId } = await auth();

@@ -1,11 +1,12 @@
 import type { FeedPost } from "@/lib/data";
 import { timeAgo } from "@/lib/posts";
-import { DeletePost } from "./DeletePost";
+import { PostFooter } from "./PostFooter";
 import { Avatar } from "./ui";
 
 // One post in the feed: who, when, what they wrote, and the book it's about,
-// shown as its title and author under a bookmark-ribbon rule. Rendered on the
-// server, so "3m ago" is worked out once, with no clock mismatch in the browser.
+// shown as its title and author under a bookmark-ribbon rule, then likes and
+// comments (PostFooter). "3m ago" is worked out from the time the server read
+// the posts, so the server and the browser agree.
 export function PostItem({ post, now }: { post: FeedPost; now: number }) {
   const at = new Date(post.createdAt);
   return (
@@ -26,7 +27,7 @@ export function PostItem({ post, now }: { post: FeedPost; now: number }) {
             {post.bookAuthor && <span className="text-muted"> by {post.bookAuthor}</span>}
           </p>
         )}
-        {post.mine && <DeletePost id={post.id} />}
+        <PostFooter post={post} now={now} />
       </div>
     </article>
   );

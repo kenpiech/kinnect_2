@@ -207,9 +207,9 @@ export function Avatar({
   name: string;
   avatar?: string | null;
   handle?: string;
-  size?: "md" | "lg";
+  size?: "sm" | "md" | "lg";
 }) {
-  const box = size === "lg" ? "size-16" : "size-12";
+  const box = size === "lg" ? "size-16" : size === "sm" ? "size-9" : "size-12";
   const src = avatar ? `/avatars/readers/${avatar}.svg` : handle ? `/avatars/${handle}.svg` : null;
   if (src) {
     return <Image src={src} alt="" width={64} height={64} unoptimized className={`${box} shrink-0 rounded-full`} />;
@@ -223,7 +223,7 @@ export function Avatar({
   return (
     <span
       aria-hidden="true"
-      className={`${box} grid shrink-0 place-items-center rounded-full bg-ink font-bold text-paper ${size === "lg" ? "text-lg" : "text-sm"}`}
+      className={`${box} grid shrink-0 place-items-center rounded-full bg-ink font-bold text-paper ${size === "lg" ? "text-lg" : size === "sm" ? "text-xs" : "text-sm"}`}
     >
       {initials}
     </span>
