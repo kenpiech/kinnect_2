@@ -1,10 +1,13 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-// Who you are is decided here, before any page runs. Only the landing page
-// and Clerk's own sign-in and sign-up pages are open; everything else sends a
-// signed-out visitor to sign in. (What you may *see* is decided later, by
-// row-level security in Supabase.)
-const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
+// A convenience, not the lock: signed-out visitors are sent to sign in before
+// a page runs. Only the landing page and Clerk's sign-in and sign-up pages
+// are open. The real checks sit next to the data, as Clerk now recommends
+// (it deprecated createRouteMatcher because path matching can drift from how
+// Next routes requests): every Server Action and /api route checks auth(),
+// and row-level security in Supabase decides what anyone may see.
+const isPublicRoute = (path: string) =>
+  path === "/" || /^\/sign-(in|up)(\/|$)/.test(path);
 
 export default clerkMiddleware(async (auth, req) => {
   // The landing page is for signed-out visitors; signed in, go to your feed
@@ -13,7 +16,7 @@ export default clerkMiddleware(async (auth, req) => {
     if (userId) return Response.redirect(new URL("/feed", req.url));
     return;
   }
-  if (isPublicRoute(req)) return;
+  if (isPublicRoute(req.nextUrl.pathname)) return;
   // APIs answer 401 rather than redirecting to the sign-in page, which a
   // fetch() in the browser can't do anything with
   if (req.nextUrl.pathname.startsWith("/api/")) {

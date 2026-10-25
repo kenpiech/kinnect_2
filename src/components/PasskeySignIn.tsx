@@ -10,11 +10,15 @@ const browserHasPasskeys = () => typeof window.PublicKeyCredential !== "undefine
 
 // Where to go after signing in: the page the proxy bounced you from, but only
 // if it's on kinnect itself, so a crafted link can't send you to another site.
+// Checking the origin isn't enough: https://kinnect…//evil.com has our origin
+// but the path "//evil.com", which a browser reads as another site. So the
+// path must start with exactly one slash. (Found in the security review.)
 function safeDestination(redirectUrl: string | null) {
   if (!redirectUrl) return "/feed";
   try {
     const url = new URL(redirectUrl, window.location.origin);
-    return url.origin === window.location.origin ? url.pathname + url.search : "/feed";
+    if (url.origin !== window.location.origin || url.pathname.startsWith("//")) return "/feed";
+    return url.pathname + url.search;
   } catch {
     return "/feed";
   }

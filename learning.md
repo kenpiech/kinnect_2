@@ -449,3 +449,36 @@ I asked for all of the remaining v1 features at once and to "use subagents as ne
 ## Write page · the book picker starts folded
 
 I asked for "Add a book from your library" to be collapsed by default. It's now a button that opens the list. Once a book is picked, the button shows which one. It starts open when you arrive from a book's "Post about it" link, and opens itself if there's a problem with the book you picked.
+
+## Step 8 · Security review
+
+**How it ran:** the `/security-review` command wouldn't start, because this Claude session was opened in the folder above the repo, and the command needs to be inside a git repository. So the agent ran the same review from inside `kinnect_2`, on everything `full-stack` changes compared with `main` (30 commits, 72 files):
+1. Read every security-relevant file.
+2. Queried the **live** database's tables, policies, grants and functions, not just the migration files.
+3. Checked the live site's headers.
+4. Sent a subagent to scan every commit for leaked keys and personal data.
+5. Proved each suspected issue before calling it a finding.
+
+**Findings and fixes:**
+
+| # | Finding | Severity | Proof | Fix |
+|---|---|---|---|---|
+| 1 | **Open redirect after passkey sign-in.** The "stay on kinnect" check compared origins only. `…/sign-in?redirect_url=https://lib-2-app.vercel.app//evil.com` passed, and the browser read the path `//evil.com` as another site. Next's router does a full page load for other origins, so a phishing link could sign you in and then hand you to an attacker's page. | Medium | Ran the check against crafted links: `//evil.com/x` came out. Read Next's router: other origins get `location.assign`. | The path must start with exactly one `/`. All 9 crafted links now land on `/feed`. |
+| 2 | **No frame protection.** Another site could load kinnect in a hidden frame and trick a signed-in classmate into clicking Accept, which would open their posts to a stranger (clickjacking). | Medium-low | The live site sent no `X-Frame-Options` and no `frame-ancestors` header. | `frame-ancestors 'none'` and `X-Frame-Options: DENY` on every response, plus `nosniff` and a strict referrer policy (`next.config.ts`). |
+| 3 | **`created_at` could be set by the user.** Through the Data API, a post dated 2099 would stay pinned to the top of every friend's feed. | Low | The live grants included `posts.created_at` and `post_comments.created_at` for inserts. | Inserts on posts and comments are granted only the columns the app sends. Checked: a normal post works; a 2099 date or a chosen id is refused (42501). |
+| 4 | **`createRouteMatcher` is deprecated**, because path matching can drift from how Next routes requests. | Low | Clerk's own deprecation note. | Replaced with a plain path check. The proxy is now documented as a convenience; the real checks are `auth()` in every action and route, plus RLS. |
+| 5 | **A compiled Python file was committed** (`scripts/__pycache__/…pyc`). It's build junk that also contained my local folder path. `.gitignore` was missing a few Playwright outputs. | Hygiene | Secrets subagent; confirmed with `git ls-files`. | Untracked it, and ignored `__pycache__`, `*.pyc`, `/blob-report/` and `/playwright/.auth/`. |
+
+**Checked and clean:**
+- **No secret has ever been committed, in any commit on any branch**, and no `.env` file was ever added.
+- No server-only key reaches the browser: only the two `NEXT_PUBLIC_` publishable values, used in a server-only file.
+- RLS is on for all 6 tables, each with the Clerk-only restrictive policy. `anon` has no grants. There are no views, and the one privileged function can't be called by users.
+- The posts read policy matches the migration exactly (so the red-demo restore held).
+- No raw-HTML rendering anywhere (React escapes everything people type).
+- Every Server Action checks the session and validates its input.
+- `/api/books` answers 401 when signed out.
+- The privacy and friends tests pass after the fixes.
+
+**Worth knowing, not changed:**
+- Anyone with the link can sign up, and any signed-in account can see every member's name and avatar on People. That's the design: People needs it, and posts stay friends-only.
+- The `.env` deny rules cover Claude's file tools but not a shell command like `cat .env.local`. AGENTS.md forbids it, and a Bash deny rule could enforce it. That change to Claude's permissions is my call to make.
