@@ -338,3 +338,22 @@ Clerk is mostly off the wire. My server and Supabase both check the token's sign
 - **Caught (my own Me post):** a post showed up in Feed but not on Me, because Me still read A3's localStorage. That prompted rebuilding Me on Supabase.
 - Added a 13th avatar on request: long blonde hair (`blonde`). A new drawing also means a migration, since the `profiles.avatar` check lists every key.
 - Added six character avatars on request: ninja, wizard, viking, detective, pilot and a polar bear (19 in all). The bear isn't a person, so it has its own drawing function with the same outline and blink. Checked that the app's list, the drawing files and the database check all name the same 19.
+
+## Step 7 (spec) · The privacy test: watched it fail, then pass
+
+**The test** (`tests/privacy.spec.ts`, `npm run test:e2e`): two Clerk test users who are **not friends**. Reader A searches Open Library, saves a book, and posts about it. Reader B opens their own Feed and Library, and must see **neither A's post nor A's book**. Then A's post and book are deleted, pass or fail. The app itself never filters by user, so the only thing standing between B and A's post is row-level security.
+
+**Setup:** `@playwright/test` and `@clerk/testing` (both pre-approved). `tests/global.setup.ts` gets a Clerk testing token, which lets the test browser past Clerk's bot protection, and creates the two users if they're missing. Their `+clerk_test@example.com` addresses mark them as test accounts, so no real email is sent. They sign in with a sign-in token from Clerk's server API, so there's no code to type. `playwright.config.ts` loads `.env.local` the way `next dev` does, so the keys reach the test without anyone opening the file.
+
+**Red, then green** (saved in `tests/evidence/`):
+
+| Run | Posts read policy | Result |
+|---|---|---|
+| 1 | `using (true)` (`tests/rls-demo/break.sql`) | **FAIL**: `B must not see A's post`, Expected: 0, Received: 1 |
+| 2 | restored (`tests/rls-demo/restore.sql`) | **PASS** in 22 s |
+
+The policy was loose for under a minute. After restoring, Postgres confirmed the policy text is character-for-character identical to the original migration, and the security advisor was clean. The failed run's cleanup still deleted A's post and book, and my own posts and books were never touched.
+
+**Caught:**
+- **It passed on the first try, so I checked the database to see whether it really did the work.** It had: A had posted, saved, and cleaned up. But **Reader B had never picked an avatar**: Playwright's `isVisible()` doesn't wait, so B's picker (which streams in after the page) hadn't appeared yet and the step was silently skipped. B's checks were still valid, but a test that quietly skips steps can't be trusted, so it now waits up to 5 s for the picker.
+- **Why the test checks B's Library too:** B's Library page runs `select * from library_items` with no filter. If the "read my library" policy broke, A's book would appear there, so that check covers the second policy for free.

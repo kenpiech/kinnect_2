@@ -1,0 +1,9 @@
+# Run after restoring the posts read policy from tests/rls-demo/restore.sql   (2026-10-24 23:40 CDT)
+
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/global.setup.ts:10:6 › Clerk testing token and test users (458ms)
+  ✓  2 [privacy] › tests/privacy.spec.ts:41:5 › two readers who aren't friends can't see each other's posts or books (21.5s)
+
+  2 passed (22.6s)
