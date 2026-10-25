@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # lib2
 
-A small social network for classmates who read: save books to your library, add friends, and post about what you're reading. Always written in lowercase: **lib2**. Version 2 of Assignment 3, "Kinnect" (a localStorage-only prototype). The repo is still `kinnect_2`, and the A3 localStorage key is still `kinnect:v1`.
+A small social network for classmates who read: save books to your library, add friends, and post about what you're reading. Always written in lowercase: **lib2**. Live at **https://lib-2-app.vercel.app** (Vercel production tracks `full-stack` until the merge, then `main`). Version 2 of Assignment 3, "Kinnect" (a localStorage-only prototype). The repo is still `kinnect_2`, and the A3 localStorage key is still `kinnect:v1`.
 
 **The rule everything follows: your library is private, and your posts are shared with your friends.**
 
@@ -19,7 +19,7 @@ A small social network for classmates who read: save books to your library, add 
 - **Clerk** for accounts (development keys only)
 - **Supabase** (Postgres) for data, connected to Clerk through Supabase third-party auth
 - **Open Library** for book search (no key)
-- Deployed on Vercel's Hobby plan
+- Deployed on Vercel's Hobby plan at `lib-2-app.vercel.app` (passkeys only work on that address)
 
 ## Product facts
 - **Real friends only.** Friends are other signed-up users. A friendship starts as a request and counts only once the other person accepts. The A3 sample personas (`src/data/people.ts`, `public/avatars/`) appear **only** as static sample posts on the signed-out landing page (`/`), never as friends.
