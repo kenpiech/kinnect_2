@@ -251,3 +251,53 @@ The **read my library** policy blocked it. **Reads fail silently:** Bob gets zer
 - **The API answered signed-out requests with a redirect to the sign-in page.** A `fetch()` can't use an HTML page. The proxy now answers `/api/*` with `401 {"error":"signed_out"}`, and the handler checks again.
 - **Server Actions are public endpoints.** Anyone can POST any arguments to `saveBook`, so it checks the session and validates every field instead of trusting the page. RLS is still the real lock: a forged `user_id` can't get past "add to my library".
 - **No cover, or a broken one:** many books have no `cover_i`, and some point at nothing. Asking with `?default=false` makes a missing cover a 404 instead of a blank image, so the page shows its own fallback.
+
+**Ask:** "Draw a diagram of one request, from the click to the screen: the browser, my server, Clerk, Supabase, and the API." Also: why does the server call the API?
+
+No single request touches all five, so here is one action, *search "hobbit", then save it*, as its two requests:
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Me as Browser
+  participant S as My server (Next.js)
+  participant C as Clerk
+  participant OL as Open Library
+  participant DB as Supabase
+
+  Note over Me,OL: Request 1: click Search
+  Me->>S: GET /api/books?q=hobbit (+ Clerk session cookie)
+  S->>S: proxy.ts verifies the JWT signature with Clerk's cached public key (signed out → 401)
+  S->>S: route.ts: auth() again, normalize q, check the hour-long cache
+  S->>OL: GET search.json?q=hobbit&fields=…&limit=20 (User-Agent, 8 s timeout)
+  OL-->>S: 200 {numFound, docs}
+  S->>S: trim to Book[] and cache for an hour
+  S-->>Me: 200 {books, total} (or 502 → "Open Library isn't answering")
+  Me->>OL: cover images, straight from covers.openlibrary.org
+  Note over Me: Screen: results, each with Save
+
+  Note over Me,DB: Request 2: click Save
+  Me->>S: Server Action saveBook(book), a POST (+ session cookie)
+  S->>S: proxy verifies the JWT; saveBook checks auth() and validates the fields
+  S->>C: getToken() (the session JWT: sub, role, iss)
+  S->>DB: POST /rest/v1/library_items, Authorization: Bearer <Clerk JWT>
+  DB->>DB: signature ✓, grant ✓, issuer ✓, user_id ← sub, "add to my library" ✓
+  DB-->>S: 201 Created
+  S->>DB: refresh() → getLibrary(): SELECT * (RLS returns only my rows)
+  S-->>Me: {ok: true} + the updated page, in one response
+  Note over Me: Screen: "Saved", the book in Your library, toast
+```
+
+Clerk is mostly off the wire. My server and Supabase both check the token's signature with Clerk's public key, without calling Clerk each time. Clerk's code in the browser refreshes the 60-second token in the background.
+
+**Why the server calls Open Library.** It needs no key, so "hide the secret" is *not* the reason. The real reasons:
+1. **One place for failure handling:** the 8 s timeout, and turning Open Library's answers into our three states (books, none, down). A change in Open Library's format means fixing one file.
+2. **A shared cache:** searches took 1.8–6.1 s. The server keeps each answer for an hour for everyone, while a browser cache helps only that browser.
+3. **Good API citizenship:** Open Library asks for an identifying User-Agent, and browsers won't let a page set one.
+4. **A gate:** signed-in only, so Kinnect isn't a free public proxy, and there's one place to add rate limits.
+5. **Privacy:** Open Library sees my server, not each classmate's IP address and searches (covers are the exception).
+6. **Ready for keys:** an API that needs a secret would already be in the right place.
+
+**Trade-offs:** an extra hop, my server becomes a dependency, all searches share one IP (so the cache matters), and a slow Open Library answer keeps a Vercel function busy while it waits.
+
+**Why Save goes through the server too:** the browser could call Supabase directly with the Clerk token, and RLS would still protect the data. A Server Action keeps the validation and database code out of the page, and returns the updated library in the same response.
