@@ -1,0 +1,191 @@
+"""Draws the 12 avatars people pick from in lib2, as SVGs in public/avatars/readers.
+
+Same parts and style as the sample friends in avatars.py (and the same
+blinking, which stops for reduce-motion), but everyday readers instead of
+characters, with a range of skin tones, ages and hair. The keys must match
+AVATARS in src/lib/avatars.ts and the check on profiles.avatar in the
+database. Run: python3 scripts/reader_avatars.py
+"""
+
+from avatars import INK, brows, svg
+
+OUT = __import__("avatars").OUT / "readers"
+
+smile = f'<path d="M51 69 q9 7 18 0" fill="none" stroke="{INK}" stroke-width="2.4" stroke-linecap="round"/>'
+
+readers = {
+    # Round glasses, side-parted dark hair, navy sweater
+    "specs": svg(
+        "a reader in round glasses",
+        bg="#d9e4d3",
+        skin="#f1c9a5",
+        shirt="#2f4a6d",
+        blink_delay=0.3,
+        neck_extra=f'<path d="M46 87 q14 9 28 0" fill="none" stroke="{INK}" stroke-width="2.2"/>',
+        eyes_extra=f'<circle cx="51" cy="58" r="7" fill="none" stroke="{INK}" stroke-width="2.2"/>'
+        f'<circle cx="69" cy="58" r="7" fill="none" stroke="{INK}" stroke-width="2.2"/>'
+        f'<path d="M58 57 q2 -2 4 0" fill="none" stroke="{INK}" stroke-width="2.2"/>' + brows(47),
+        front=f'<path d="M37 50 C35 28 60 24 72 30 C82 34 85 42 83 50 C78 40 66 36 52 42 C46 44 40 46 37 50 Z" fill="#2a1f1a" stroke="{INK}" stroke-width="2.5"/>',
+    ),
+    # High bun and gold hoops, brick-red top
+    "bun": svg(
+        "a reader with a high bun",
+        bg="#f0dcc8",
+        skin="#b07850",
+        shirt="#c8553d",
+        blink_delay=1.9,
+        back=f'<circle cx="60" cy="27" r="10" fill="#2b1a14" stroke="{INK}" stroke-width="2.5"/>',
+        eyes_extra=brows(50),
+        face_extra='<circle cx="37" cy="68" r="3.5" fill="none" stroke="#d8b44a" stroke-width="2"/>'
+        '<circle cx="83" cy="68" r="3.5" fill="none" stroke="#d8b44a" stroke-width="2"/>',
+        front=f'<path d="M38 52 C37 32 50 30 60 31 C70 30 83 32 82 52 C78 42 70 38 60 38 C50 38 42 42 38 52 Z" fill="#2b1a14" stroke="{INK}" stroke-width="2.5"/>',
+        mouth=smile,
+    ),
+    # Big curls, coral top
+    "curls": svg(
+        "a reader with big curls",
+        bg="#e7d6ef",
+        skin="#6b4127",
+        shirt="#e0735a",
+        blink_delay=3.1,
+        back="".join(
+            f'<circle cx="{x}" cy="{y}" r="{r}" fill="#1d1410" stroke="{INK}" stroke-width="2.5"/>'
+            for x, y, r in [(40, 42, 16), (60, 31, 20), (80, 42, 16), (33, 60, 12), (87, 60, 12)]
+        ),
+        eyes_extra=brows(50),
+        front="".join(
+            f'<circle cx="{x}" cy="{y}" r="{r}" fill="#1d1410" stroke="{INK}" stroke-width="2.2"/>'
+            for x, y, r in [(47, 37, 7), (60, 34, 8), (73, 37, 7)]
+        ),
+        mouth=f'<path d="M50 69 q10 8 20 0 z" fill="#fff" stroke="{INK}" stroke-width="2.2"/>',
+    ),
+    # Red knit beanie with a pompom, mustard scarf
+    "beanie": svg(
+        "a reader in a beanie and scarf",
+        bg="#d6e2ea",
+        skin="#d9a47c",
+        shirt="#4f7a5a",
+        blink_delay=2.4,
+        neck_extra=f'<path d="M40 86 C50 94 70 94 80 86 L82 94 C70 102 50 102 38 94 Z" fill="#e3b23c" stroke="{INK}" stroke-width="2.2"/>'
+        f'<path d="M66 96 l7 22 h-9 l-3 -20 z" fill="#e3b23c" stroke="{INK}" stroke-width="2.2"/>',
+        eyes_extra=brows(52),
+        front=f'<path d="M36 48 C36 22 84 22 84 48 Z" fill="#b8402f" stroke="{INK}" stroke-width="2.5"/>'
+        f'<rect x="34" y="43" width="52" height="9" rx="4" fill="#9c3426" stroke="{INK}" stroke-width="2.5"/>'
+        f'<circle cx="60" cy="21" r="6" fill="#f3eddf" stroke="{INK}" stroke-width="2.2"/>',
+        mouth=smile,
+    ),
+    # Bald with a full beard, green cardigan
+    "beard": svg(
+        "a reader with a full beard",
+        bg="#efe3c2",
+        skin="#8a5634",
+        shirt="#55703f",
+        blink_delay=0.9,
+        neck_extra=f'<path d="M48 86 l12 14 l12 -14" fill="none" stroke="{INK}" stroke-width="2.2"/>',
+        eyes_extra=brows(49, w=3.2),
+        face_extra=f'<path d="M40 64 C40 82 50 87 60 87 C70 87 80 82 80 64 C76 74 70 76 60 76 C50 76 44 74 40 64 Z" fill="#2a1c15" stroke="{INK}" stroke-width="2.2"/>'
+        '<path d="M50 38 q6 -3 12 0" fill="none" stroke="#fff" stroke-width="2" opacity=".35" stroke-linecap="round"/>',
+        mouth=f'<path d="M53 70 q7 5 14 0" fill="none" stroke="#f3eddf" stroke-width="2.4" stroke-linecap="round"/>',
+        cheeks=False,
+    ),
+    # Black bob with straight bangs, lavender top
+    "bob": svg(
+        "a reader with a bob and bangs",
+        bg="#e6e0f2",
+        skin="#efc19a",
+        shirt="#7c5ca8",
+        blink_delay=3.8,
+        eyes_extra=brows(52),
+        front=f'<path d="M36 76 C30 44 38 30 60 30 C82 30 90 44 84 76 C80 78 77 76 77 70 C79 56 78 50 76 47 C70 45 50 45 44 47 C42 50 41 56 43 70 C43 76 40 78 36 76 Z" fill="#151112" stroke="{INK}" stroke-width="2.5"/>',
+        mouth=smile,
+    ),
+    # Teal headscarf, draped to the shoulders
+    "hijab": svg(
+        "a reader in a headscarf",
+        bg="#f3e1c8",
+        skin="#c48a62",
+        shirt="#2f7f7a",
+        blink_delay=1.4,
+        eyes_extra=brows(50),
+        front=f'<path fill-rule="evenodd" d="M60 25 C87 25 93 48 91 66 C89 80 85 88 97 100 C101 104 105 112 107 122 L13 122 C15 112 19 104 23 100 C35 88 31 80 29 66 C27 48 33 25 60 25 Z M39 58 a21 24 0 1 0 42 0 a21 24 0 1 0 -42 0 Z" fill="#2f7f7a" stroke="{INK}" stroke-width="2.5"/>'
+        f'<path d="M40 50 C46 40 74 40 80 50" fill="none" stroke="#24635f" stroke-width="2"/>',
+        mouth=smile,
+    ),
+    # Silver hair and half-moon reading glasses, plum cardigan
+    "silver": svg(
+        "a reader with silver hair and reading glasses",
+        bg="#dde3e8",
+        skin="#f0cdb0",
+        shirt="#8c4a5a",
+        blink_delay=2.0,
+        neck_extra=f'<path d="M48 86 l12 14 l12 -14" fill="#f3eddf" stroke="{INK}" stroke-width="2.2"/>'
+        f'<circle cx="60" cy="106" r="1.6" fill="{INK}"/><circle cx="60" cy="114" r="1.6" fill="{INK}"/>',
+        eyes_extra=f'<path d="M44 60 h14 v3 q-7 6 -14 0 z M62 60 h14 v3 q-7 6 -14 0 z" fill="none" stroke="{INK}" stroke-width="2"/>'
+        f'<path d="M58 61 h4" stroke="{INK}" stroke-width="2"/>' + brows(49, color="#9a948a"),
+        front=f'<path d="M36 54 C32 34 44 26 60 28 C76 26 88 34 84 54 C82 46 78 42 72 42 C68 38 52 38 48 42 C42 42 38 46 36 54 Z" fill="#cfcac2" stroke="{INK}" stroke-width="2.5"/>',
+        mouth=f'<path d="M52 71 q8 5 16 0" fill="none" stroke="{INK}" stroke-width="2.4" stroke-linecap="round"/>',
+    ),
+    # Long box braids with gold beads, sunflower top
+    "braids": svg(
+        "a reader with long braids",
+        bg="#d5e6dc",
+        skin="#5c3620",
+        shirt="#e8b93c",
+        blink_delay=4.4,
+        back=f'<path d="M26 50 q-4 30 2 56 h9 q-4 -28 2 -56 z M83 50 q4 30 -2 56 h-9 q4 -28 -2 -56 z" fill="#1b1310" stroke="{INK}" stroke-width="2.2"/>'
+        '<circle cx="32" cy="104" r="2.5" fill="#d8b44a"/><circle cx="88" cy="104" r="2.5" fill="#d8b44a"/>',
+        eyes_extra=brows(50),
+        front=f'<path d="M37 54 C34 30 50 28 60 30 C70 28 86 30 83 54 C80 44 72 38 61 36 L60 40 L59 36 C48 38 40 44 37 54 Z" fill="#1b1310" stroke="{INK}" stroke-width="2.5"/>',
+        mouth=smile,
+    ),
+    # Headphones over short hair, blue tee
+    "headphones": svg(
+        "a reader wearing headphones",
+        bg="#f2d7cf",
+        skin="#d6a57e",
+        shirt="#3d5f8f",
+        blink_delay=1.1,
+        eyes_extra=brows(49),
+        front=f'<path d="M38 50 C36 30 52 28 60 30 C68 28 84 30 82 50 C76 40 68 38 60 40 C52 38 44 40 38 50 Z" fill="#3a2a1e" stroke="{INK}" stroke-width="2.5"/>'
+        f'<path d="M33 58 C33 22 87 22 87 58" fill="none" stroke="{INK}" stroke-width="5" stroke-linecap="round"/>'
+        f'<rect x="27" y="51" width="11" height="18" rx="5" fill="#e0735a" stroke="{INK}" stroke-width="2.5"/>'
+        f'<rect x="82" y="51" width="11" height="18" rx="5" fill="#e0735a" stroke="{INK}" stroke-width="2.5"/>',
+        mouth=smile,
+    ),
+    # Long red hair and freckles, green top
+    "freckles": svg(
+        "a reader with red hair and freckles",
+        bg="#f6e3b4",
+        skin="#f6d3b8",
+        shirt="#3f7d6e",
+        blink_delay=2.9,
+        back=f'<path d="M32 82 C26 50 36 30 60 30 C84 30 94 50 88 82 C84 92 78 90 78 82 L42 82 C42 90 36 92 32 82 Z" fill="#c4602f" stroke="{INK}" stroke-width="2.5"/>',
+        eyes_extra=brows(50, color="#9c4a24"),
+        face_extra="".join(
+            f'<circle cx="{x}" cy="{y}" r="1.1" fill="#b9774d"/>' for x, y in [(46, 63), (49, 65), (52, 63), (68, 63), (71, 65), (74, 63)]
+        ),
+        front=f'<path d="M37 52 C38 32 56 26 70 32 C80 36 84 44 83 52 C76 42 64 38 52 44 C46 46 40 48 37 52 Z" fill="#c4602f" stroke="{INK}" stroke-width="2.5"/>',
+        mouth=smile,
+    ),
+    # Newsboy cap and a white mustache, violet sweater
+    "cap": svg(
+        "a reader in a newsboy cap",
+        bg="#e4dccd",
+        skin="#c99a74",
+        shirt="#6a5a8c",
+        blink_delay=3.5,
+        neck_extra=f'<path d="M46 87 q14 9 28 0" fill="none" stroke="{INK}" stroke-width="2.2"/>',
+        eyes_extra=brows(50, color="#d9d4cb", w=3),
+        face_extra=f'<path d="M47 67 C51 63 58 64 60 66 C62 64 69 63 73 67 C69 71 63 70 60 69 C57 70 51 71 47 67 Z" fill="#ece8e0" stroke="{INK}" stroke-width="2"/>',
+        mouth=f'<path d="M55 75 q5 3 10 0" fill="none" stroke="{INK}" stroke-width="2.2" stroke-linecap="round"/>',
+        front=f'<path d="M35 47 C35 27 84 25 87 43 C91 45 92 50 85 50 C70 46 50 46 35 49 Z" fill="#7a6a55" stroke="{INK}" stroke-width="2.5"/>'
+        f'<path d="M33 49 C45 45 66 45 75 49 C66 55 44 55 33 51 Z" fill="#5f513f" stroke="{INK}" stroke-width="2.2"/>'
+        f'<circle cx="60" cy="29" r="2.4" fill="#5f513f"/>',
+    ),
+}
+
+if __name__ == "__main__":
+    OUT.mkdir(parents=True, exist_ok=True)
+    for key, content in readers.items():
+        (OUT / f"{key}.svg").write_text(content)
+    print("wrote", len(readers), "avatars to", OUT)

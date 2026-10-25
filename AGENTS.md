@@ -29,13 +29,14 @@ A small social network for classmates who read: save books to your library, add 
 - **People tab:** list and search other users. Request, Accept and Remove (Remove also covers decline, cancel and unfriend).
 - **Posts:** up to 280 characters, optionally about one book from your library. Your feed shows your posts and your accepted friends' posts, newest first.
 - **Tabs:** Feed · Library · People · Me.
+- **Avatars are required.** Everyone picks one of 12 drawn readers (`public/avatars/readers`, drawn by `scripts/reader_avatars.py`; keys in `src/lib/avatars.ts` and the `profiles.avatar` check). Until they do, `ProfileSync` shows `AvatarGate`, a modal `<dialog>` that Escape can't close. They can change it on Me. Avatars show on posts, People and Me. Initials are only a fallback.
 
 ## Data model
 Four tables in Supabase. Every ID that names a person is a **Clerk user ID** (`text`), and columns that record "who did this" default to `auth.jwt()->>'sub'`. Below, **me** means `auth.jwt()->>'sub'`.
 
 | Table | Columns | Who can do what (RLS) |
 |---|---|---|
-| `profiles` | `user_id` text PK, `display_name` text, `created_at` | **read:** any signed-in user (People needs names). **insert/update:** own row only. |
+| `profiles` | `user_id` text PK, `display_name` text, `avatar` (one of 12 keys, null until picked), `created_at` | **read:** any signed-in user (People needs names). **insert/update:** own row only (`display_name` and `avatar` columns). |
 | `library_items` | `id`, `user_id`, `ol_key` (e.g. `/works/OL27482W`), `title`, `author`, `cover_id` and `year` (all three nullable), `added_at`; unique (`user_id`, `ol_key`) | **read/insert/delete:** own rows only. Private, even from friends. |
 | `friendships` | `id`, `requester_id`, `addressee_id`, `status` (`pending` or `accepted`), `created_at`; one row per pair of people | **read:** either person. **insert:** requester is me, status `pending`. **update:** addressee is me (to accept). **delete:** either person. |
 | `posts` | `id`, `user_id`, `body` (1–280 chars), `book_ol_key`, `book_title`, `book_author` (all nullable), `created_at` | **read:** my posts, or posts by someone I have an **accepted** friendship with. **insert/delete:** own only. |
@@ -43,7 +44,7 @@ Four tables in Supabase. Every ID that names a person is a **Clerk user ID** (`t
 - **A post copies the book's details** instead of pointing at a `library_items` row. Friends can't read your library, so a link would show up broken for them.
 - **A profile is created on first sign-in** (an upsert from the Clerk name). No webhook.
 - **RLS is on for every table, and the `anon` role has no policies.** Never turn RLS off, never add a `using (true)` read policy (except the deliberate test break, which is reverted), and never use the Supabase secret/service-role key in the app.
-- **Grants come first.** "Automatically expose new tables" is off, so a new table has no access until a migration grants it. Grant only what the app uses, only to `authenticated`, and never to `anon`, even when a Postgres error hint suggests it. Updates are granted per column (`profiles.display_name`, `friendships.status`) so that accepting a request can't also rewrite who sent it.
+- **Grants come first.** "Automatically expose new tables" is off, so a new table has no access until a migration grants it. Grant only what the app uses, only to `authenticated`, and never to `anon`, even when a Postgres error hint suggests it. Updates are granted per column (`profiles.display_name`, `profiles.avatar`, `friendships.status`) so that accepting a request can't also rewrite who sent it.
 - **Only lib2's Clerk tokens count.** Every table has a restrictive policy requiring `iss` = `https://holy-gelding-7096.clerk.accounts.dev`, because Supabase also trusts its own built-in sign-in. A new table needs the same policy.
 - **App queries rely on RLS.** Don't add `.eq('user_id', …)` filters that duplicate a policy. The Playwright test proves RLS works, and redundant filters would hide a broken policy.
 - Schema changes are **migrations** applied through the Supabase MCP server, with a copy of each saved in `supabase/migrations/`, never edits in the dashboard. After each one, run the security and performance advisors. The `auth_rls_initplan` warnings are false positives: our `(select auth.jwt()->>'sub')` form already runs once per query.

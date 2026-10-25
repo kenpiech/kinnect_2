@@ -10,7 +10,7 @@ export function PostItem({ post, now }: { post: FeedPost; now: number }) {
   const at = new Date(post.createdAt);
   return (
     <article className="flex gap-3 border-b border-rule py-5">
-      <Avatar name={post.authorName} />
+      <Avatar name={post.authorName} avatar={post.authorAvatar} />
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-baseline gap-x-2 text-[15px] leading-snug">
           <span className="text-[17px] font-semibold">{post.mine ? "You" : post.authorName}</span>

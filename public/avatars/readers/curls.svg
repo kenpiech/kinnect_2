@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of a reader with big curls">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 3.1s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#e7d6ef"/>
+<circle cx="40" cy="42" r="16" fill="#1d1410" stroke="#2b2620" stroke-width="2.5"/><circle cx="60" cy="31" r="20" fill="#1d1410" stroke="#2b2620" stroke-width="2.5"/><circle cx="80" cy="42" r="16" fill="#1d1410" stroke="#2b2620" stroke-width="2.5"/><circle cx="33" cy="60" r="12" fill="#1d1410" stroke="#2b2620" stroke-width="2.5"/><circle cx="87" cy="60" r="12" fill="#1d1410" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#e0735a" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#6b4127" stroke="#2b2620" stroke-width="2.5"/>
+
+<circle cx="38" cy="59" r="5.5" fill="#6b4127" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#6b4127" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#6b4127" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="45" cy="66" r="4.5" fill="#e8907a" opacity=".35"/><circle cx="75" cy="66" r="4.5" fill="#e8907a" opacity=".35"/>
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 50 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="2.6" stroke-linecap="round"/><path d="M64 50 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+
+<path d="M50 69 q10 8 20 0 z" fill="#fff" stroke="#2b2620" stroke-width="2.2"/>
+<circle cx="47" cy="37" r="7" fill="#1d1410" stroke="#2b2620" stroke-width="2.2"/><circle cx="60" cy="34" r="8" fill="#1d1410" stroke="#2b2620" stroke-width="2.2"/><circle cx="73" cy="37" r="7" fill="#1d1410" stroke="#2b2620" stroke-width="2.2"/>
+</g>
+</svg>

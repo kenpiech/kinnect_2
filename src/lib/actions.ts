@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { refresh } from "next/cache";
+import { isAvatar } from "./avatars";
 import { OL_WORK_KEY, type Book } from "./books";
 import { ensureProfile } from "./data";
 import { MAX_POST, postLength } from "./posts";
@@ -216,6 +217,24 @@ export async function updateDisplayName(name: string): Promise<ActionResult> {
   if (error) {
     console.error("Couldn't rename profile:", error.message);
     return { ok: false, error: "Couldn't save your name. Try again." };
+  }
+  refresh();
+  return { ok: true };
+}
+
+// Pick one of the 12 drawn avatars. The database checks the name too.
+export async function setAvatar(avatar: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (!isAvatar(avatar)) return { ok: false, error: "Pick one of the avatars shown." };
+
+  const db = await supabase();
+  // Supabase refuses an UPDATE with no filter, so this names my row; the
+  // "rename my profile" policy would stop it touching anyone else's anyway
+  const { error } = await db.from("profiles").update({ avatar }).eq("user_id", userId);
+  if (error) {
+    console.error("Couldn't set avatar:", error.message);
+    return { ok: false, error: "Couldn't save your avatar. Try again." };
   }
   refresh();
   return { ok: true };

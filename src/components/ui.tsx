@@ -195,21 +195,24 @@ export function PageHeader({ title, children }: { title: string; children?: Reac
   );
 }
 
-// A cartoon portrait (public/avatars, drawn by scripts/avatars.py): one for
-// each sample friend, and "me" for you.
-export function Avatar({ name, handle, size = "md" }: { name: string; handle?: string; size?: "md" | "lg" }) {
+// A cartoon portrait: the one a person picked (public/avatars/readers, drawn
+// by scripts/reader_avatars.py), or a sample friend's on the landing page
+// (public/avatars, by scripts/avatars.py). Initials until someone has picked.
+export function Avatar({
+  name,
+  avatar,
+  handle,
+  size = "md",
+}: {
+  name: string;
+  avatar?: string | null;
+  handle?: string;
+  size?: "md" | "lg";
+}) {
   const box = size === "lg" ? "size-16" : "size-12";
-  if (handle) {
-    return (
-      <Image
-        src={`/avatars/${handle}.svg`}
-        alt=""
-        width={64}
-        height={64}
-        unoptimized
-        className={`${box} shrink-0 rounded-full`}
-      />
-    );
+  const src = avatar ? `/avatars/readers/${avatar}.svg` : handle ? `/avatars/${handle}.svg` : null;
+  if (src) {
+    return <Image src={src} alt="" width={64} height={64} unoptimized className={`${box} shrink-0 rounded-full`} />;
   }
   const initials = name
     .split(/\s+/)

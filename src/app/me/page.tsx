@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { AvatarForm } from "@/components/AvatarPicker";
 import { NameForm, SignOut } from "@/components/MeForms";
 import { PostItem } from "@/components/posts";
 import { Avatar, Banner, PageHeader, TextLink } from "@/components/ui";
@@ -37,13 +38,15 @@ async function Me() {
   return (
     <>
       <div className="flex items-center gap-4">
-        <Avatar name={me.name} size="lg" />
+        <Avatar name={me.name} avatar={me.avatar} size="lg" />
         <PageHeader title={me.name}>
           {plural(me.friendCount, "friend")} · {plural(me.bookCount, "book")} · {plural(me.posts.length, "post")}
         </PageHeader>
       </div>
 
       <NameForm current={me.name} />
+
+      <AvatarForm current={me.avatar} />
 
       <section aria-labelledby="my-posts" className="grid gap-1">
         <h2 id="my-posts" className="label border-b border-rule pb-2 text-muted">

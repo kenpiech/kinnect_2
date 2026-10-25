@@ -168,7 +168,7 @@ function Group({
 function PersonRow({ person, children }: { person: Person; children: React.ReactNode }) {
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-rule py-4">
-      <Avatar name={person.name} />
+      <Avatar name={person.name} avatar={person.avatar} />
       <p className="min-w-0 flex-1 break-words text-[17px] font-semibold">{person.name}</p>
       <div className="flex items-center gap-1">{children}</div>
     </li>

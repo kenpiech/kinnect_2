@@ -10,32 +10,37 @@ import { supabase } from "./supabase";
 // Don't add .eq("user_id", …) filters that repeat a policy: the Playwright
 // test proves the policies work, and a duplicate filter would hide a broken one.
 
-// Gives the signed-in person a profile, so classmates can find them on People.
-// Runs on every full page load, but only writes the first time.
-export async function ensureProfile() {
+// Gives the signed-in person a profile, so classmates can find them on People,
+// and says whether they've picked an avatar yet. Runs on every full page load,
+// but only writes the first time. Null when signed out or Supabase failed.
+export async function ensureProfile(): Promise<{ avatar: string | null } | null> {
   const { userId } = await auth();
-  if (!userId) return;
+  if (!userId) return null;
 
   const db = await supabase();
   // Everyone signed in can read every profile, so this filter is how we find
   // our own row, not a repeat of a policy
   const { data: existing, error: readError } = await db
     .from("profiles")
-    .select("user_id")
+    .select("avatar")
     .eq("user_id", userId)
     .maybeSingle();
   if (readError) {
     console.error("Couldn't read profile:", readError.message);
-    return;
+    return null;
   }
-  if (existing) return;
+  if (existing) return existing;
 
   const user = await currentUser();
   const displayName = user?.fullName?.trim() || user?.firstName?.trim() || "New reader";
   // user_id fills itself in from the session token
   const { error } = await db.from("profiles").insert({ display_name: displayName });
   // 23505: another tab created it a moment ago
-  if (error && error.code !== "23505") console.error("Couldn't create profile:", error.message);
+  if (error && error.code !== "23505") {
+    console.error("Couldn't create profile:", error.message);
+    return null;
+  }
+  return { avatar: null };
 }
 
 // Your saved books, newest first. No user filter: the "read my library"
@@ -53,6 +58,7 @@ export async function getLibrary(): Promise<LibraryItem[] | null> {
 export type Person = {
   userId: string;
   name: string;
+  avatar: string | null;
   // How you're connected: not yet, you asked them, they asked you, or friends
   status: "none" | "sent" | "received" | "friends";
   // The friendship row, for Accept and Remove
@@ -68,7 +74,7 @@ export async function getPeople(): Promise<Person[] | null> {
   if (!userId) return null;
   const db = await supabase();
   const [profiles, friendships] = await Promise.all([
-    db.from("profiles").select("user_id, display_name").order("display_name"),
+    db.from("profiles").select("user_id, display_name, avatar").order("display_name"),
     db.from("friendships").select("id, requester_id, addressee_id, status"),
   ]);
   if (profiles.error || friendships.error) {
@@ -90,7 +96,7 @@ export async function getPeople(): Promise<Person[] | null> {
           : f.requester_id === userId
             ? "sent"
             : "received";
-      return { userId: p.user_id, name: p.display_name, status, friendshipId: f?.id ?? null };
+      return { userId: p.user_id, name: p.display_name, avatar: p.avatar, status, friendshipId: f?.id ?? null };
     });
 }
 
@@ -101,6 +107,7 @@ export type FeedPost = {
   bookAuthor: string | null;
   createdAt: string;
   authorName: string;
+  authorAvatar: string | null;
   mine: boolean;
 };
 
@@ -115,7 +122,7 @@ export async function getFeed(): Promise<{ posts: FeedPost[]; friendCount: numbe
   const [posts, friends] = await Promise.all([
     db
       .from("posts")
-      .select("id, body, book_title, book_author, created_at, user_id, profiles(display_name)")
+      .select("id, body, book_title, book_author, created_at, user_id, profiles(display_name, avatar)")
       .order("created_at", { ascending: false })
       .limit(100),
     db.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted"),
@@ -134,6 +141,7 @@ export async function getFeed(): Promise<{ posts: FeedPost[]; friendCount: numbe
       bookAuthor: p.book_author,
       createdAt: p.created_at,
       authorName: p.profiles?.display_name ?? "A classmate",
+      authorAvatar: p.profiles?.avatar ?? null,
       mine: p.user_id === userId,
     })),
   };
@@ -143,6 +151,7 @@ export async function getFeed(): Promise<{ posts: FeedPost[]; friendCount: numbe
 // have. Null means Supabase couldn't be reached.
 export async function getMe(): Promise<{
   name: string;
+  avatar: string | null;
   posts: FeedPost[];
   friendCount: number;
   bookCount: number;
@@ -155,7 +164,7 @@ export async function getMe(): Promise<{
   // allowed to read (every profile; my friends' posts too). They select, they
   // don't stand in for a policy.
   const [profile, posts, friends, books] = await Promise.all([
-    db.from("profiles").select("display_name").eq("user_id", userId).maybeSingle(),
+    db.from("profiles").select("display_name, avatar").eq("user_id", userId).maybeSingle(),
     db
       .from("posts")
       .select("id, body, book_title, book_author, created_at")
@@ -170,8 +179,10 @@ export async function getMe(): Promise<{
     return null;
   }
   const name = profile.data?.display_name ?? "You";
+  const avatar = profile.data?.avatar ?? null;
   return {
     name,
+    avatar,
     readAt: Date.now(),
     friendCount: friends.count ?? 0,
     bookCount: books.count ?? 0,
@@ -182,6 +193,7 @@ export async function getMe(): Promise<{
       bookAuthor: p.book_author,
       createdAt: p.created_at,
       authorName: name,
+      authorAvatar: avatar,
       mine: true,
     })),
   };

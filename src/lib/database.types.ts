@@ -128,16 +128,19 @@ export type Database = {
       };
       profiles: {
         Row: {
+          avatar: string | null;
           created_at: string;
           display_name: string;
           user_id: string;
         };
         Insert: {
+          avatar?: string | null;
           created_at?: string;
           display_name: string;
           user_id?: string;
         };
         Update: {
+          avatar?: string | null;
           created_at?: string;
           display_name?: string;
           user_id?: string;
