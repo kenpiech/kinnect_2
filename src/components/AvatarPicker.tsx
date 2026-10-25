@@ -6,7 +6,7 @@ import { setAvatar } from "@/lib/actions";
 import { AVATARS } from "@/lib/avatars";
 import { Button, Toast, useToast } from "./ui";
 
-// The 12 avatars as one group of radio buttons, each drawn as its portrait.
+// The avatars as one group of radio buttons, each drawn as its portrait.
 // Arrow keys move between them, like any radio group.
 function AvatarChoices({ value, onChange }: { value: string | null; onChange: (key: string) => void }) {
   const name = useId();

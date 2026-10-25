@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of a reader with long blonde hair">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 4.0s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#dfe6f0"/>
+<path d="M30 86 C24 52 34 30 60 30 C86 30 96 52 90 86 C88 94 80 94 79 86 L41 86 C40 94 32 94 30 86 Z" fill="#e9c46a" stroke="#2b2620" stroke-width="2.5"/><path d="M34 72 q3 8 0 14 M86 72 q-3 8 0 14" fill="none" stroke="#c9a24a" stroke-width="2" stroke-linecap="round"/>
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#d9788f" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#f5d0b5" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M47 87 q13 9 26 0" fill="none" stroke="#2b2620" stroke-width="2.2"/>
+<circle cx="38" cy="59" r="5.5" fill="#f5d0b5" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#f5d0b5" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#f5d0b5" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="45" cy="66" r="4.5" fill="#e8907a" opacity=".35"/><circle cx="75" cy="66" r="4.5" fill="#e8907a" opacity=".35"/>
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 50 q5 -3 10 0" fill="none" stroke="#b08a3e" stroke-width="2.6" stroke-linecap="round"/><path d="M64 50 q5 -3 10 0" fill="none" stroke="#b08a3e" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+<circle cx="37" cy="67" r="2.2" fill="#fbf7ee" stroke="#cfc6b4" stroke-width="1"/><circle cx="83" cy="67" r="2.2" fill="#fbf7ee" stroke="#cfc6b4" stroke-width="1"/>
+<path d="M51 69 q9 7 18 0" fill="none" stroke="#2b2620" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M37 54 C36 34 50 27 64 29 C78 31 85 40 83 54 C80 46 74 40 66 38 C60 44 48 48 37 54 Z" fill="#e9c46a" stroke="#2b2620" stroke-width="2.5"/><path d="M66 38 C62 44 54 48 46 50" fill="none" stroke="#c9a24a" stroke-width="2" stroke-linecap="round"/>
+</g>
+</svg>

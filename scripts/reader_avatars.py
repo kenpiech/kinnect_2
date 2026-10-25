@@ -1,4 +1,4 @@
-"""Draws the 12 avatars people pick from in lib2, as SVGs in public/avatars/readers.
+"""Draws the 13 avatars people pick from in lib2, as SVGs in public/avatars/readers.
 
 Same parts and style as the sample friends in avatars.py (and the same
 blinking, which stops for reduce-motion), but everyday readers instead of
@@ -165,6 +165,23 @@ readers = {
             f'<circle cx="{x}" cy="{y}" r="1.1" fill="#b9774d"/>' for x, y in [(46, 63), (49, 65), (52, 63), (68, 63), (71, 65), (74, 63)]
         ),
         front=f'<path d="M37 52 C38 32 56 26 70 32 C80 36 84 44 83 52 C76 42 64 38 52 44 C46 46 40 48 37 52 Z" fill="#c4602f" stroke="{INK}" stroke-width="2.5"/>',
+        mouth=smile,
+    ),
+    # Long golden waves with a side-swept fringe, pearl studs, rose top
+    "blonde": svg(
+        "a reader with long blonde hair",
+        bg="#dfe6f0",
+        skin="#f5d0b5",
+        shirt="#d9788f",
+        blink_delay=4.0,
+        back=f'<path d="M30 86 C24 52 34 30 60 30 C86 30 96 52 90 86 C88 94 80 94 79 86 L41 86 C40 94 32 94 30 86 Z" fill="#e9c46a" stroke="{INK}" stroke-width="2.5"/>'
+        '<path d="M34 72 q3 8 0 14 M86 72 q-3 8 0 14" fill="none" stroke="#c9a24a" stroke-width="2" stroke-linecap="round"/>',
+        neck_extra=f'<path d="M47 87 q13 9 26 0" fill="none" stroke="{INK}" stroke-width="2.2"/>',
+        eyes_extra=brows(50, color="#b08a3e"),
+        face_extra='<circle cx="37" cy="67" r="2.2" fill="#fbf7ee" stroke="#cfc6b4" stroke-width="1"/>'
+        '<circle cx="83" cy="67" r="2.2" fill="#fbf7ee" stroke="#cfc6b4" stroke-width="1"/>',
+        front=f'<path d="M37 54 C36 34 50 27 64 29 C78 31 85 40 83 54 C80 46 74 40 66 38 C60 44 48 48 37 54 Z" fill="#e9c46a" stroke="{INK}" stroke-width="2.5"/>'
+        '<path d="M66 38 C62 44 54 48 46 50" fill="none" stroke="#c9a24a" stroke-width="2" stroke-linecap="round"/>',
         mouth=smile,
     ),
     # Newsboy cap and a white mustache, violet sweater

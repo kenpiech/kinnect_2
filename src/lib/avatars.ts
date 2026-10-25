@@ -1,4 +1,4 @@
-// The 12 avatars people pick from, drawn by scripts/reader_avatars.py into
+// The 13 avatars people pick from, drawn by scripts/reader_avatars.py into
 // public/avatars/readers. The keys must match the check on profiles.avatar.
 export const AVATARS = [
   { key: "specs", label: "Round glasses" },
@@ -12,6 +12,7 @@ export const AVATARS = [
   { key: "braids", label: "Long braids" },
   { key: "headphones", label: "Headphones" },
   { key: "freckles", label: "Red hair and freckles" },
+  { key: "blonde", label: "Long blonde hair" },
   { key: "cap", label: "Newsboy cap" },
 ] as const;
 

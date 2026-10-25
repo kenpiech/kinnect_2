@@ -222,7 +222,7 @@ export async function updateDisplayName(name: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-// Pick one of the 12 drawn avatars. The database checks the name too.
+// Pick one of the drawn avatars. The database checks the name too.
 export async function setAvatar(avatar: string): Promise<ActionResult> {
   const { userId } = await auth();
   if (!userId) return SIGNED_OUT;
