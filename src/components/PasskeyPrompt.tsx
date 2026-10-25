@@ -8,7 +8,7 @@ import { Banner, Button } from "./ui";
 const noSubscribe = () => () => {};
 const browserHasPasskeys = () => typeof window.PublicKeyCredential !== "undefined";
 
-// Kinnect has no passwords: you sign up with an emailed code, then add a
+// kinnect has no passwords: you sign up with an emailed code, then add a
 // passkey so later sign-ins are just Face ID, Touch ID or a fingerprint.
 // Clerk's own "Add passkey" is three clicks deep in the account menu, so this
 // offers it at the top of the page to anyone signed in without one. "Not now"
@@ -48,7 +48,7 @@ export function PasskeyPrompt() {
       if (isClerkRuntimeError(e) && e.code === "passkey_registration_cancelled") return;
       setError(
         isClerkRuntimeError(e) && e.code === "passkey_already_exists"
-          ? "This device already has a passkey for Kinnect. Use “Sign in with passkey” next time."
+          ? "This device already has a passkey for kinnect. Use “Sign in with passkey” next time."
           : "Couldn't add a passkey. Try again, or add one later from your account menu under Security.",
       );
     } finally {

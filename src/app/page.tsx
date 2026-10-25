@@ -1,7 +1,7 @@
 import { Avatar, ButtonLink } from "@/components/ui";
 import { samplePosts } from "@/data/samples";
 
-// The signed-out front door: what Kinnect is, how it works, and three sample
+// The signed-out front door: what kinnect is, how it works, and three sample
 // posts so it isn't an empty promise. Static, with no one's real data.
 // Signed-in visitors never see it: src/proxy.ts sends them to /feed.
 export default function Landing() {
@@ -12,7 +12,7 @@ export default function Landing() {
           Keep up with your classmates.
         </h1>
         <p className="text-muted sm:text-lg">
-          Kinnect is a small, quiet social network for your class. Add classmates as friends, post what&apos;s on your mind, and
+          kinnect is a small, quiet social network for your class. Add classmates as friends, post what&apos;s on your mind, and
           keep a private library of the books you&apos;re reading. No photos, no algorithm, newest first.
         </p>
         <div className="flex flex-wrap gap-3">

@@ -66,7 +66,7 @@ export type Person = {
   friendshipId: string | null;
 };
 
-// Everyone on Kinnect but you, with how each of them is connected to you.
+// Everyone on kinnect but you, with how each of them is connected to you.
 // Profiles are readable by anyone signed in; friendships come back only when
 // you're one of the two people, thanks to "read my friendships". Null means
 // Supabase couldn't be reached.
@@ -105,6 +105,7 @@ export type PostComment = {
   id: string;
   body: string;
   createdAt: string;
+  authorId: string;
   authorName: string;
   authorAvatar: string | null;
   mine: boolean;
@@ -115,9 +116,14 @@ export type PostComment = {
 export type FeedPost = {
   id: string;
   body: string;
+  // The book it's about, if any: a copy made when the post was written
+  bookOlKey: string | null;
   bookTitle: string | null;
   bookAuthor: string | null;
+  // Whether that book is already in your library (for "Save to my library")
+  bookSaved: boolean;
   createdAt: string;
+  authorId: string;
   authorName: string;
   authorAvatar: string | null;
   mine: boolean;
@@ -131,7 +137,7 @@ export type FeedPost = {
 // comments come back only for posts you can see: their policies reuse the
 // posts read policy. The author needs the !posts_user_id_fkey hint because
 // post_likes also links posts to profiles (as "people who liked it").
-const POST_FIELDS = `id, body, book_title, book_author, created_at, user_id,
+const POST_FIELDS = `id, body, book_ol_key, book_title, book_author, created_at, user_id,
   author:profiles!posts_user_id_fkey(display_name, avatar),
   post_likes(user_id, profiles(display_name)),
   post_comments(id, body, created_at, user_id, profiles(display_name, avatar))`;
@@ -140,14 +146,22 @@ type Db = Awaited<ReturnType<typeof supabase>>;
 const postQuery = (db: Db) => db.from("posts").select(POST_FIELDS);
 type PostRow = QueryData<ReturnType<typeof postQuery>>[number];
 
-function toFeedPost(p: PostRow, userId: string): FeedPost {
+// The Open Library keys of the books in your library. No user filter: the
+// "read my library" policy returns only yours.
+const myBookKeys = (db: Db) => db.from("library_items").select("ol_key");
+
+// saved: the keys from myBookKeys, so a post can say whether you have its book
+function toFeedPost(p: PostRow, userId: string, saved: Set<string>): FeedPost {
   const mine = p.user_id === userId;
   return {
     id: p.id,
     body: p.body,
+    bookOlKey: p.book_ol_key,
     bookTitle: p.book_title,
     bookAuthor: p.book_author,
+    bookSaved: p.book_ol_key !== null && saved.has(p.book_ol_key),
     createdAt: p.created_at,
+    authorId: p.user_id,
     authorName: p.author?.display_name ?? "A classmate",
     authorAvatar: p.author?.avatar ?? null,
     mine,
@@ -161,6 +175,7 @@ function toFeedPost(p: PostRow, userId: string): FeedPost {
         id: c.id,
         body: c.body,
         createdAt: c.created_at,
+        authorId: c.user_id,
         authorName: c.profiles?.display_name ?? "A classmate",
         authorAvatar: c.profiles?.avatar ?? null,
         mine: c.user_id === userId,
@@ -177,18 +192,21 @@ export async function getFeed(): Promise<{ posts: FeedPost[]; friendCount: numbe
   const { userId } = await auth();
   if (!userId) return null;
   const db = await supabase();
-  const [posts, friends] = await Promise.all([
+  const [posts, friends, books] = await Promise.all([
     postQuery(db).order("created_at", { ascending: false }).limit(100),
     db.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted"),
+    myBookKeys(db),
   ]);
-  if (posts.error || friends.error) {
-    console.error("Couldn't read feed:", (posts.error ?? friends.error)?.message);
+  const failed = posts.error ?? friends.error ?? books.error;
+  if (failed) {
+    console.error("Couldn't read feed:", failed.message);
     return null;
   }
+  const saved = new Set((books.data ?? []).map((b) => b.ol_key));
   return {
     readAt: Date.now(),
     friendCount: friends.count ?? 0,
-    posts: posts.data.map((p) => toFeedPost(p, userId)),
+    posts: (posts.data ?? []).map((p) => toFeedPost(p, userId, saved)),
   };
 }
 
@@ -212,7 +230,7 @@ export async function getMe(): Promise<{
     db.from("profiles").select("display_name, avatar").eq("user_id", userId).maybeSingle(),
     postQuery(db).eq("user_id", userId).order("created_at", { ascending: false }),
     db.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted"),
-    db.from("library_items").select("id", { count: "exact", head: true }),
+    myBookKeys(db),
   ]);
   const failed = profile.error ?? posts.error ?? friends.error ?? books.error;
   if (failed) {
@@ -226,7 +244,7 @@ export async function getMe(): Promise<{
     avatar,
     readAt: Date.now(),
     friendCount: friends.count ?? 0,
-    bookCount: books.count ?? 0,
-    posts: (posts.data ?? []).map((p) => toFeedPost(p, userId)),
+    bookCount: books.data?.length ?? 0,
+    posts: (posts.data ?? []).map((p) => toFeedPost(p, userId, new Set(books.data?.map((b) => b.ol_key)))),
   };
 }

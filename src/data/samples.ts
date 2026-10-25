@@ -1,6 +1,6 @@
 // Three made-up posts for the signed-out landing page, by three of the sample
 // characters from Assignment 3 (their portraits are in public/avatars). They
-// show what Kinnect looks like before you have an account. They're labelled as
+// show what kinnect looks like before you have an account. They're labelled as
 // samples on the page and never appear anywhere else.
 
 export type SamplePost = {

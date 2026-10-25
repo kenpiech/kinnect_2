@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-// The only things Kinnect keeps in the browser: the post you're still writing,
+// The only things kinnect keeps in the browser: the post you're still writing,
 // so leaving Write doesn't lose it, and a one-time message for the next page
 // ("Posted…"). Everything else lives in Supabase. Storage can be blocked
 // (private browsing), so every read and write is allowed to fail quietly.

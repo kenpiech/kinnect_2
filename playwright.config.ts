@@ -5,7 +5,7 @@ import { defineConfig, devices } from "@playwright/test";
 // test process without anyone opening the file.
 loadEnvConfig(process.cwd());
 
-// End-to-end tests: tests/privacy.spec.ts proves two Kinnect users who aren't
+// End-to-end tests: tests/privacy.spec.ts proves two kinnect users who aren't
 // friends can't see each other's data; tests/likes-comments.spec.ts checks
 // likes and comments between friends. It runs against the local dev server, signed
 // in as two Clerk test users. Run: npm run test:e2e

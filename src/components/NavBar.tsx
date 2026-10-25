@@ -56,7 +56,7 @@ export function NavBar() {
       </a>
       <div className="mx-auto flex max-w-2xl items-center gap-6 px-4 py-2">
         <Link href="/" className="mr-auto py-1 text-2xl font-semibold italic tracking-tight">
-          Kinnect
+          kinnect
         </Link>
         {isLoaded && isSignedIn && (
           <>

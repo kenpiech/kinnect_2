@@ -4,12 +4,12 @@ import { People } from "@/components/People";
 import { Banner, PageHeader } from "@/components/ui";
 import { getPeople } from "@/lib/data";
 
-export const metadata: Metadata = { title: "People · Kinnect" };
+export const metadata: Metadata = { title: "People · kinnect" };
 
 export default function PeoplePage() {
   return (
     <div className="grid gap-8">
-      <PageHeader title="People">Classmates on Kinnect. Friends see each other&apos;s posts.</PageHeader>
+      <PageHeader title="People">Classmates on kinnect. Friends see each other&apos;s posts.</PageHeader>
       {/* Who's connected to you depends on who's asking, so it loads at request time */}
       <Suspense fallback={<p className="text-muted">Finding people…</p>}>
         <PeopleList />
@@ -23,7 +23,7 @@ async function PeopleList() {
   if (!people) {
     return (
       <Banner tone="accent" title="Couldn't load people">
-        Kinnect couldn&apos;t reach its database. Reload the page to try again.
+        kinnect couldn&apos;t reach its database. Reload the page to try again.
       </Banner>
     );
   }

@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { escape, pickAvatarIfAsked, signIn } from "./helpers";
 import { READERS } from "./readers";
 
-// The rule Kinnect follows: your library is private, and your posts are shared
+// The rule kinnect follows: your library is private, and your posts are shared
 // with your friends. Reader A and Reader B are not friends, so B must see
 // neither A's post nor A's book.
 //

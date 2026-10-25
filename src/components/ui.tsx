@@ -5,7 +5,7 @@ import Link from "next/link";
 import { forwardRef, useCallback, useEffect, useId, useState } from "react";
 
 // Shared building blocks. Every page uses these instead of styling its own
-// buttons, fields or notices, so Kinnect looks and behaves the same everywhere.
+// buttons, fields or notices, so kinnect looks and behaves the same everywhere.
 
 type Variant = "primary" | "secondary" | "quiet";
 

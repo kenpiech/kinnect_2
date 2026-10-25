@@ -54,6 +54,7 @@ export type Database = {
           cover_id: number | null;
           id: string;
           ol_key: string;
+          status: string;
           title: string;
           user_id: string;
           year: number | null;
@@ -64,6 +65,7 @@ export type Database = {
           cover_id?: number | null;
           id?: string;
           ol_key: string;
+          status?: string;
           title: string;
           user_id?: string;
           year?: number | null;
@@ -74,6 +76,7 @@ export type Database = {
           cover_id?: number | null;
           id?: string;
           ol_key?: string;
+          status?: string;
           title?: string;
           user_id?: string;
           year?: number | null;
@@ -164,6 +167,7 @@ export type Database = {
         Row: {
           body: string;
           book_author: string | null;
+          book_cover_id: number | null;
           book_ol_key: string | null;
           book_title: string | null;
           created_at: string;
@@ -173,6 +177,7 @@ export type Database = {
         Insert: {
           body: string;
           book_author?: string | null;
+          book_cover_id?: number | null;
           book_ol_key?: string | null;
           book_title?: string | null;
           created_at?: string;
@@ -182,6 +187,7 @@ export type Database = {
         Update: {
           body?: string;
           book_author?: string | null;
+          book_cover_id?: number | null;
           book_ol_key?: string | null;
           book_title?: string | null;
           created_at?: string;
