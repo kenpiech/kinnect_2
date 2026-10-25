@@ -200,3 +200,25 @@ How the CLI works: `clerk auth login` (in my terminal) saves a token in the macO
 - **Postgres's error hint suggests the dangerous fix.** For a signed-out read, it says `GRANT SELECT ON public.posts TO anon`. Following that would make every post public. The error is the lock working.
 - **17 "performance" warnings were false positives.** The linter wants `(select auth.jwt())`, and we wrote `(select auth.jwt()->>'sub')`. `EXPLAIN` showed Postgres computes it once per query (an InitPlan) and uses the index, so I left them.
 - **Clerk deprecation:** `createRouteMatcher` is going away, partly because `/sign-in(.*)` also matches look-alike paths like `/sign-inxyz`. Harmless today, since no such routes exist. Saved for the step 10 security review.
+
+**Second lock, Supabase sign-ups off:** in Authentication → Sign In / Providers, I turned off "Allow new users to sign up" and left anonymous sign-ins off and "Confirm email" on. Tested from outside with only the public key: `POST /auth/v1/signup` → `422 signup_disabled`. Kinnect users are unaffected, since they sign up through Clerk and never become Supabase accounts.
+
+**Ask:** "Explain each row-level security policy in plain words, then show me a query that one of them would block."
+
+"Me" means the Clerk user ID in the request's token.
+
+- **Every table, "kinnect clerk sessions only" (restrictive):** whatever else is allowed, the token must come from Kinnect's Clerk instance.
+- **profiles:** anyone signed in can read every name (People needs it). You can only create your own profile, and only change your own name.
+- **library_items:** you see, add and remove only your own books. Private even from friends.
+- **friendships:** you see a friendship only if you're one of the two people in it. You can only send a request from yourself, as pending. Only the person who received a pending request can accept it, and accepting changes only the status. Either person can remove it (decline, cancel or unfriend).
+- **posts:** you see your own posts plus posts by anyone you have an **accepted** friendship with, either direction (pending shows nothing). You can only write and delete your own.
+- Posts and library items have no update policy and no update grant, so nobody can edit them.
+
+**A blocked query** (real database, rolled back). Alice and Bob each saved a book and aren't friends. As Bob:
+
+| Bob's query | Rows |
+|---|---|
+| `select * from library_items where user_id = 'user_A'` (Alice's, by name) | **0** |
+| `select * from library_items` (no filter) | 1, his own |
+
+The **read my library** policy blocked it. **Reads fail silently:** Bob gets zero rows, not an error, so he can't even tell whether Alice has a library. **Writes fail loudly:** inserting a post with Alice's ID gives `new row violates row-level security policy`. That's why the app never filters by user: `select * from library_items` already returns only mine, and a filter in the app would hide a broken policy from the Playwright test.
