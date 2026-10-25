@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { refresh } from "next/cache";
 import { OL_WORK_KEY, type Book } from "./books";
 import { ensureProfile } from "./data";
+import { MAX_POST, postLength } from "./posts";
 import { supabase } from "./supabase";
 
 // Server Actions: the browser calls these to change data. Every export here is
@@ -12,7 +13,8 @@ import { supabase } from "./supabase";
 // the real lock; these checks just give a clear message instead of a database
 // error.
 
-export type ActionResult = { ok: true } | { ok: false; error: string };
+// field says which part of the form an error belongs to, when it isn't the main one
+export type ActionResult = { ok: true } | { ok: false; error: string; field?: "book" };
 
 const SIGNED_OUT: ActionResult = { ok: false, error: "Your session ended. Sign in again, then retry." };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -130,6 +132,70 @@ export async function removeFriendship(friendshipId: string): Promise<ActionResu
   if (error) {
     console.error("Couldn't remove friendship:", error.message);
     return { ok: false, error: "Couldn't do that. Try again." };
+  }
+  refresh();
+  return { ok: true };
+}
+
+// A post, optionally about one book from your library. The book's title and
+// author are copied from your library row here on the server, not taken from
+// the page, so a post can only name a book you actually saved.
+export async function createPost(input: { body: string; bookOlKey: string | null }): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+
+  const body = typeof input?.body === "string" ? input.body.trim() : "";
+  if (!body) return { ok: false, error: "Write something first." };
+  const length = postLength(body);
+  if (length > MAX_POST) return { ok: false, error: `Keep it to ${MAX_POST} characters. You're ${length - MAX_POST} over.` };
+
+  const db = await supabase();
+  let book: { ol_key: string; title: string; author: string | null } | null = null;
+  if (input.bookOlKey !== null) {
+    if (typeof input.bookOlKey !== "string" || !OL_WORK_KEY.test(input.bookOlKey)) {
+      return { ok: false, error: "That book didn't come through. Pick it again.", field: "book" };
+    }
+    // The "read my library" policy keeps this to my own books; the ol_key
+    // filter picks the one
+    const { data, error } = await db
+      .from("library_items")
+      .select("ol_key, title, author")
+      .eq("ol_key", input.bookOlKey)
+      .maybeSingle();
+    if (error) {
+      console.error("Couldn't read library for post:", error.message);
+      return { ok: false, error: "Couldn't post. Try again." };
+    }
+    if (!data) {
+      return { ok: false, error: "That book isn't in your library anymore. Pick another, or post without one.", field: "book" };
+    }
+    book = data;
+  }
+
+  const row = { body, book_ol_key: book?.ol_key ?? null, book_title: book?.title ?? null, book_author: book?.author ?? null };
+  let { error } = await db.from("posts").insert(row);
+  if (error?.code === "23503") {
+    await ensureProfile();
+    ({ error } = await db.from("posts").insert(row));
+  }
+  if (error) {
+    console.error("Couldn't create post:", error.message);
+    return { ok: false, error: "Couldn't post. Try again." };
+  }
+  return { ok: true };
+}
+
+export async function deletePost(postId: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof postId !== "string" || !UUID.test(postId)) return { ok: false, error: "Couldn't find that post. Reload and retry." };
+
+  const db = await supabase();
+  // If it isn't mine, the "delete my posts" policy makes this delete nothing
+  const { error } = await db.from("posts").delete().eq("id", postId);
+  if (error) {
+    console.error("Couldn't delete post:", error.message);
+    return { ok: false, error: "Couldn't delete it. Try again." };
   }
   refresh();
   return { ok: true };

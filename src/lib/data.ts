@@ -93,3 +93,48 @@ export async function getPeople(): Promise<Person[] | null> {
       return { userId: p.user_id, name: p.display_name, status, friendshipId: f?.id ?? null };
     });
 }
+
+export type FeedPost = {
+  id: string;
+  body: string;
+  bookTitle: string | null;
+  bookAuthor: string | null;
+  createdAt: string;
+  authorName: string;
+  mine: boolean;
+};
+
+// Your feed: your posts and your accepted friends' posts, newest first. No
+// author filter: the "read mine and my friends' posts" policy decides whose
+// posts come back. Null means Supabase couldn't be reached.
+// readAt is when the posts were read, for "3m ago".
+export async function getFeed(): Promise<{ posts: FeedPost[]; friendCount: number; readAt: number } | null> {
+  const { userId } = await auth();
+  if (!userId) return null;
+  const db = await supabase();
+  const [posts, friends] = await Promise.all([
+    db
+      .from("posts")
+      .select("id, body, book_title, book_author, created_at, user_id, profiles(display_name)")
+      .order("created_at", { ascending: false })
+      .limit(100),
+    db.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted"),
+  ]);
+  if (posts.error || friends.error) {
+    console.error("Couldn't read feed:", (posts.error ?? friends.error)?.message);
+    return null;
+  }
+  return {
+    readAt: Date.now(),
+    friendCount: friends.count ?? 0,
+    posts: posts.data.map((p) => ({
+      id: p.id,
+      body: p.body,
+      bookTitle: p.book_title,
+      bookAuthor: p.book_author,
+      createdAt: p.created_at,
+      authorName: p.profiles?.display_name ?? "A classmate",
+      mine: p.user_id === userId,
+    })),
+  };
+}

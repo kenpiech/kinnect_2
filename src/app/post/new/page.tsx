@@ -1,66 +1,32 @@
-"use client";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Composer } from "@/components/Composer";
+import { PageHeader, TextLink } from "@/components/ui";
+import { getLibrary } from "@/lib/data";
 
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
-import { Button, Field, PageHeader, TextLink } from "@/components/ui";
-import { MAX_POST, addPost, setDraft, setFlash, useStore } from "@/lib/store";
+export const metadata: Metadata = { title: "Write · lib2" };
 
-// The second form: write a post. A live count shows what's left. What you
-// write is saved as a draft as you type, so leaving doesn't lose it. Errors
-// sit under the box, say what to do, and never clear what you wrote.
-export default function NewPost() {
-  const router = useRouter();
-  const s = useStore();
-  const text = s?.draft ?? "";
-  const [error, setError] = useState<string | undefined>();
-  const box = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
-
-  const left = MAX_POST - text.trim().length;
-
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    const result = addPost(text);
-    if (!result.ok) {
-      setError(result.error);
-      box.current?.focus();
-      return;
-    }
-    setFlash("Posted. It's at the top of your feed.");
-    router.push("/feed");
-  }
-
+// Write a post. "Post about it" in the Library opens this page with
+// ?book=/works/OL…W, and that book starts out picked.
+export default function NewPostPage({ searchParams }: PageProps<"/post/new">) {
   return (
     <div className="grid gap-8">
       <TextLink href="/feed" className="justify-self-start text-[15px] text-muted">
         ← Back to feed
       </TextLink>
-
-      <PageHeader title="Write a post">Short and text only. It goes at the top of your feed.</PageHeader>
-
-      <form onSubmit={submit} noValidate className="grid gap-4">
-        <Field
-          ref={box}
-          multiline
-          label="What are you up to?"
-          hint={text.trim() ? "Draft saved on this device." : undefined}
-          error={error}
-          value={text}
-          onChange={(e) => {
-            setDraft(e.target.value);
-            if (error) setError(undefined);
-          }}
-          placeholder="Ran my first 5K. Legs are jelly."
-          autoFocus
-          aside={
-            <span aria-live="polite" className={`text-[14px] ${left < 0 ? "font-semibold text-danger" : "text-muted"}`}>
-              {left < 0 ? `${-left} over` : `${left} left`}
-            </span>
-          }
-        />
-        <Button type="submit" className="w-full sm:w-auto sm:justify-self-start">
-          Post
-        </Button>
-      </form>
+      <PageHeader title="Write a post">Up to 280 characters. Your friends see it in their feed.</PageHeader>
+      {/* Your library depends on who's asking, so it loads at request time */}
+      <Suspense fallback={<p className="text-muted">Getting your library…</p>}>
+        <ComposerWithLibrary searchParams={searchParams} />
+      </Suspense>
     </div>
   );
+}
+
+async function ComposerWithLibrary({ searchParams }: { searchParams: PageProps<"/post/new">["searchParams"] }) {
+  const [library, params] = await Promise.all([getLibrary(), searchParams]);
+  const wanted = typeof params.book === "string" ? params.book : null;
+  // Only pre-pick a book that's really in your library
+  const initialBook = wanted && library?.some((i) => i.ol_key === wanted) ? wanted : null;
+  return <Composer library={library ?? []} libraryFailed={!library} initialBook={initialBook} />;
 }

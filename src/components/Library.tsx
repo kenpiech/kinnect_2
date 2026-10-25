@@ -144,6 +144,9 @@ export function Library({ items }: { items: LibraryItem[] }) {
             <ul>
               {items.map((item) => (
                 <BookRow key={item.id} book={toBook(item)}>
+                  <ButtonLink href={`/post/new?book=${encodeURIComponent(item.ol_key)}`} variant="quiet">
+                    Post about it<span className="sr-only"> {item.title}</span>
+                  </ButtonLink>
                   <Button variant="quiet" disabled={busy.has(item.id)} onClick={() => remove(item)}>
                     {busy.has(item.id) ? "Removing…" : "Remove"}
                     <span className="sr-only"> {item.title}</span>
