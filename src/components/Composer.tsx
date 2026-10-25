@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { createPost } from "@/lib/actions";
 import type { LibraryItem } from "@/lib/database.types";
 import { MAX_POST, postLength } from "@/lib/posts";
-import { setDraft, setFlash, useStore } from "@/lib/store";
+import { setDraft, setFlash, useDraft } from "@/lib/store";
 import { BookCover } from "./books";
 import { Banner, Button, Field, TextLink } from "./ui";
 
@@ -22,8 +22,7 @@ export function Composer({
   initialBook: string | null;
 }) {
   const router = useRouter();
-  const s = useStore();
-  const text = s?.draft ?? "";
+  const text = useDraft();
   const [book, setBook] = useState<string | null>(initialBook);
   const [error, setError] = useState<string>();
   const [bookError, setBookError] = useState<string>();

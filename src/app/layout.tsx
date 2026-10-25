@@ -5,7 +5,6 @@ import { Suspense } from "react";
 import { NavBar, RouteFocus, TabBar } from "@/components/NavBar";
 import { PasskeyPrompt } from "@/components/PasskeyPrompt";
 import { ProfileSync } from "@/components/ProfileSync";
-import { Session } from "@/components/Session";
 import "./globals.css";
 
 const literata = Literata({ subsets: ["latin"], style: ["normal", "italic"], variable: "--font-literata" });
@@ -43,7 +42,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <NavBar />
           </Suspense>
           <main id="main" tabIndex={-1} className="mx-auto w-full max-w-2xl flex-1 px-4 py-6 sm:py-8">
-            <Session />
             <PasskeyPrompt />
             <Suspense>
               <ProfileSync />
@@ -52,7 +50,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </main>
           <footer className="border-t border-rule">
             <p className="mx-auto max-w-2xl px-4 py-4 text-[15px] italic text-muted">
-              Sample friends · saved on this device
+              Your library is private. Your posts are for your friends.
             </p>
           </footer>
           <Suspense>

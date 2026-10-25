@@ -54,12 +54,3 @@ html body {
   font-weight: 600;
   line-height: 1.3;
 }
-
-/* A post arriving while you read */
-@keyframes arrive {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-    background: var(--color-surface);
-  }
-}

@@ -357,3 +357,12 @@ The policy was loose for under a minute. After restoring, Postgres confirmed the
 **Caught:**
 - **It passed on the first try, so I checked the database to see whether it really did the work.** It had: A had posted, saved, and cleaned up. But **Reader B had never picked an avatar**: Playwright's `isVisible()` doesn't wait, so B's picker (which streams in after the page) hadn't appeared yet and the step was silently skipped. B's checks were still valid, but a test that quietly skips steps can't be trusted, so it now waits up to 5 s for the picker.
 - **Why the test checks B's Library too:** B's Library page runs `select * from library_items` with no filter. If the "read my library" policy broke, A's book would appear there, so that check covers the second policy for free.
+
+## Cleanup · Assignment 3 leftovers
+
+- **`/` is now a static landing page** for signed-out visitors: what lib2 is, how it works in three steps, and three **book-themed sample posts** from three A3 characters, labelled "sample posts" so nobody mistakes them for real users. Signed-in visitors go straight to Feed (`proxy.ts`).
+- **Removed things that had become misleading:** the footer said "Sample friends · saved on this device" (now it states the privacy rule), and A3's "this browser isn't saving" banner and fast-forward bar (`Session.tsx`) could still appear. Also deleted A3's card and type-ahead components and the 65-post sample network.
+- **`store.ts` shrank from 336 lines to the two things still kept in the browser:** the unsent draft and the one-time "Posted…" message. Everything else is in Supabase.
+- The privacy test still passes after the cleanup. It walks through Write, Feed, Me and Library, so it doubles as a regression check.
+
+**Caught: the red demo leaked to a real user.** While the posts policy was loosened, *I* saw Test Reader A's "private" post in my own feed on the live site. `using (true)` didn't just fail the test; it exposed every post to every signed-in account, real ones included, because the test and the app share one database. For a real product, that demo belongs on a separate test database (a second Supabase project or a branch), never production.

@@ -7,6 +7,12 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // The landing page is for signed-out visitors; signed in, go to your feed
+  if (req.nextUrl.pathname === "/") {
+    const { userId } = await auth();
+    if (userId) return Response.redirect(new URL("/feed", req.url));
+    return;
+  }
   if (isPublicRoute(req)) return;
   // APIs answer 401 rather than redirecting to the sign-in page, which a
   // fetch() in the browser can't do anything with
