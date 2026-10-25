@@ -138,3 +138,51 @@ export async function getFeed(): Promise<{ posts: FeedPost[]; friendCount: numbe
     })),
   };
 }
+
+// The Me page: your name, your own posts, and how many friends and books you
+// have. Null means Supabase couldn't be reached.
+export async function getMe(): Promise<{
+  name: string;
+  posts: FeedPost[];
+  friendCount: number;
+  bookCount: number;
+  readAt: number;
+} | null> {
+  const { userId } = await auth();
+  if (!userId) return null;
+  const db = await supabase();
+  // These two user_id filters pick *my* row and *my* posts out of what I'm
+  // allowed to read (every profile; my friends' posts too). They select, they
+  // don't stand in for a policy.
+  const [profile, posts, friends, books] = await Promise.all([
+    db.from("profiles").select("display_name").eq("user_id", userId).maybeSingle(),
+    db
+      .from("posts")
+      .select("id, body, book_title, book_author, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false }),
+    db.from("friendships").select("id", { count: "exact", head: true }).eq("status", "accepted"),
+    db.from("library_items").select("id", { count: "exact", head: true }),
+  ]);
+  const failed = profile.error ?? posts.error ?? friends.error ?? books.error;
+  if (failed) {
+    console.error("Couldn't read Me:", failed.message);
+    return null;
+  }
+  const name = profile.data?.display_name ?? "You";
+  return {
+    name,
+    readAt: Date.now(),
+    friendCount: friends.count ?? 0,
+    bookCount: books.count ?? 0,
+    posts: (posts.data ?? []).map((p) => ({
+      id: p.id,
+      body: p.body,
+      bookTitle: p.book_title,
+      bookAuthor: p.book_author,
+      createdAt: p.created_at,
+      authorName: name,
+      mine: true,
+    })),
+  };
+}

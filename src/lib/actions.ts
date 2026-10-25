@@ -200,3 +200,23 @@ export async function deletePost(postId: string): Promise<ActionResult> {
   refresh();
   return { ok: true };
 }
+
+// The name classmates see on People and on your posts
+export async function updateDisplayName(name: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  const clean = typeof name === "string" ? name.trim().replace(/\s+/g, " ") : "";
+  if (!clean) return { ok: false, error: "Type the name you'd like classmates to see." };
+  if ([...clean].length > 80) return { ok: false, error: "Keep it to 80 characters." };
+
+  const db = await supabase();
+  // Supabase refuses an UPDATE with no filter, so this names my row; the
+  // "rename my profile" policy would stop it touching anyone else's anyway
+  const { error } = await db.from("profiles").update({ display_name: clean }).eq("user_id", userId);
+  if (error) {
+    console.error("Couldn't rename profile:", error.message);
+    return { ok: false, error: "Couldn't save your name. Try again." };
+  }
+  refresh();
+  return { ok: true };
+}
