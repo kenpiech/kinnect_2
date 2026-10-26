@@ -3,6 +3,7 @@
 import { useSignIn } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
+import { rememberPasskeyHere } from "@/lib/store";
 import { Button } from "./ui";
 
 const noSubscribe = () => () => {};
@@ -53,6 +54,8 @@ export function PasskeySignIn() {
       setError("Almost there. Finish signing in with an email code below.");
       return;
     }
+    // It worked, so this device has a passkey: no need to offer to add one
+    rememberPasskeyHere();
     const destination = safeDestination(searchParams.get("redirect_url"));
     await signIn.finalize({
       navigate: ({ decorateUrl }) => {

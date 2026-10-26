@@ -345,12 +345,12 @@ export async function deleteComment(commentId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-// The name classmates see on People and on your posts
+// The name people see on People and on your posts
 export async function updateDisplayName(name: string): Promise<ActionResult> {
   const { userId } = await auth();
   if (!userId) return SIGNED_OUT;
   const clean = typeof name === "string" ? name.trim().replace(/\s+/g, " ") : "";
-  if (!clean) return { ok: false, error: "Type the name you'd like classmates to see." };
+  if (!clean) return { ok: false, error: "Type the name you'd like people to see." };
   if ([...clean].length > 80) return { ok: false, error: "Keep it to 80 characters." };
 
   const db = await supabase();

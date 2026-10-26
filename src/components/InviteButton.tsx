@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button, Field, Toast, useToast } from "./ui";
 
-// "Invite a classmate": opens the phone's share sheet with kinnect's link,
+// "Invite a friend": opens the phone's share sheet with kinnect's link,
 // or copies the link where there's no share sheet (most desktop browsers).
 // If the browser blocks both, it shows the link so they can copy it by hand.
 export function InviteButton({ className = "" }: { className?: string }) {
@@ -17,7 +17,7 @@ export function InviteButton({ className = "" }: { className?: string }) {
       try {
         await navigator.share({
           title: "kinnect",
-          text: "Join me on kinnect, a small social network for our class.",
+          text: "Join me on kinnect, a small social network for friends.",
           url,
         });
         return;
@@ -30,7 +30,7 @@ export function InviteButton({ className = "" }: { className?: string }) {
     try {
       await navigator.clipboard.writeText(url);
       setManual(null);
-      showToast("Link copied. Send it to a classmate.");
+      showToast("Link copied. Send it to a friend.");
     } catch {
       setManual(url);
     }
@@ -39,11 +39,11 @@ export function InviteButton({ className = "" }: { className?: string }) {
   return (
     <div className={`grid gap-3 ${className}`}>
       <Button variant="secondary" onClick={invite} className="justify-self-start">
-        Invite a classmate
+        Invite a friend
       </Button>
       {manual && (
         <Field
-          label="Copy this link and send it to a classmate"
+          label="Copy this link and send it to a friend"
           readOnly
           value={manual}
           // Select it all on focus, so it's one step to copy on a phone

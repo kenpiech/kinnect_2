@@ -21,7 +21,7 @@ const STATUS: Record<Person["status"], string> = {
   none: "Not friends yet",
 };
 
-// A classmate's page: who they are, how you're connected, the friend
+// Someone's page: who they are, how you're connected, the friend
 // buttons, and their posts (only once you're friends, which the database
 // decides). Their library never shows, even to friends.
 export default function PersonPage({ params }: PageProps<"/people/[userId]">) {

@@ -19,6 +19,10 @@ export default function NewPostPage({ searchParams }: PageProps<"/post/new">) {
       <Suspense fallback={<p className="text-muted">Getting your library…</p>}>
         <ComposerWithLibrary searchParams={searchParams} />
       </Suspense>
+      {/* The privacy reminder lives only here and on Library, where it matters */}
+      <p className="border-t border-rule pt-4 text-[15px] italic text-muted">
+        Your posts are for your friends. Your library is private.
+      </p>
     </div>
   );
 }

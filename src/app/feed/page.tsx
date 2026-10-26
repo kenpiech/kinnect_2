@@ -50,7 +50,7 @@ async function Feed() {
       >
         <span className="min-w-0 flex-1">
           <span className="block font-semibold">What&apos;s on your mind?</span>
-          <span className="block text-[15px] text-muted">Write a post for your friends. Mention a book from your library if you like.</span>
+          <span className="block text-[15px] text-muted">Write a post for your friends.</span>
         </span>
         <span aria-hidden="true" className="text-xl text-accent">
           →

@@ -1,12 +1,14 @@
 import { useSyncExternalStore } from "react";
 
 // The only things kinnect keeps in the browser: the post you're still writing,
-// so leaving Write doesn't lose it, and a one-time message for the next page
-// ("Posted…"). Everything else lives in Supabase. Storage can be blocked
-// (private browsing), so every read and write is allowed to fail quietly.
+// so leaving Write doesn't lose it, a one-time message for the next page
+// ("Posted…"), and whether this device has a passkey. Everything else lives
+// in Supabase. Storage can be blocked (private browsing), so every read and
+// write is allowed to fail quietly.
 
 const DRAFT = "kinnect:draft";
 const FLASH = "kinnect:flash";
+const PASSKEY = "kinnect:passkey";
 const listeners = new Set<() => void>();
 
 function read(store: Storage | undefined, key: string) {
@@ -60,4 +62,15 @@ export function takeFlash() {
   const message = read(session(), FLASH);
   write(session(), FLASH, null);
   return message;
+}
+
+// Whether this browser has a kinnect passkey. Clerk knows how many passkeys
+// your account has, but not which devices hold them, so a passkey made on a
+// laptop would otherwise stop the phone from ever offering to make its own.
+export function hasPasskeyHere() {
+  return read(local(), PASSKEY) === "yes";
+}
+
+export function rememberPasskeyHere() {
+  write(local(), PASSKEY, "yes");
 }

@@ -31,6 +31,28 @@ function RequestBadge({ requests }: NavProps) {
   );
 }
 
+// Clerk's account menu (email, passkeys, sign out). Clerk only knows the
+// photo you'd upload to Clerk, so on its own it shows a blank silhouette. This
+// paints your kinnect avatar over it, in the button and inside the menu.
+function AccountButton({ avatar }: { avatar: Promise<string | null> }) {
+  const key = use(avatar);
+  if (!key) return <UserButton />;
+  const picture = { backgroundImage: `url(/avatars/readers/${key}.svg)`, backgroundSize: "cover" };
+  const hidden = { opacity: 0 };
+  return (
+    <UserButton
+      appearance={{
+        elements: {
+          userButtonAvatarBox: picture,
+          userButtonAvatarImage: hidden,
+          userPreviewAvatarBox: picture,
+          userPreviewAvatarImage: hidden,
+        },
+      }}
+    />
+  );
+}
+
 function TabLinks({ mobile, requests }: NavProps & { mobile?: boolean }) {
   const pathname = usePathname();
   return (
@@ -62,10 +84,11 @@ function TabLinks({ mobile, requests }: NavProps & { mobile?: boolean }) {
 
 // The top bar on every page. From the sm breakpoint up it holds the tabs too;
 // on a phone they're in TabBar at the bottom instead. The current page is
-// marked with the accent and aria-current. Signed out, it offers only sign in
-// and sign up; signed in, the tabs, Write and Clerk's account menu (which has
-// sign out). Until Clerk knows which, the right side stays empty.
-export function NavBar({ requests }: NavProps) {
+// marked with the accent and aria-current. Signed out, it's just the logo
+// (the landing page and Clerk's forms already link sign in and sign up, and a
+// second pair here was clutter on a phone); signed in, the tabs, Write and
+// Clerk's account menu (which has sign out).
+export function NavBar({ requests, avatar }: NavProps & { avatar: Promise<string | null> }) {
   const pathname = usePathname();
   const { isLoaded, isSignedIn } = useAuth();
 
@@ -94,18 +117,10 @@ export function NavBar({ requests }: NavProps) {
               Write
             </ButtonLink>
             <div className="flex min-h-11 min-w-11 items-center justify-center">
-              <UserButton />
+              <Suspense>
+                <AccountButton avatar={avatar} />
+              </Suspense>
             </div>
-          </>
-        )}
-        {isLoaded && !isSignedIn && (
-          <>
-            <ButtonLink href="/sign-in" variant="quiet">
-              Sign in
-            </ButtonLink>
-            <ButtonLink href="/sign-up" className="px-4">
-              Sign up
-            </ButtonLink>
           </>
         )}
       </div>

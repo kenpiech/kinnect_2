@@ -5,7 +5,7 @@ import { Suspense, cache } from "react";
 import { NavBar, RouteFocus, TabBar } from "@/components/NavBar";
 import { PasskeyPrompt } from "@/components/PasskeyPrompt";
 import { ProfileSync } from "@/components/ProfileSync";
-import { getPendingRequestCount } from "@/lib/data";
+import { ensureProfile, getPendingRequestCount } from "@/lib/data";
 import "./globals.css";
 
 const literata = Literata({ subsets: ["latin"], style: ["normal", "italic"], variable: "--font-literata" });
@@ -14,7 +14,7 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, view
 
 export const metadata: Metadata = {
   title: "kinnect",
-  description: "A small social network for your class, with a private reading library.",
+  description: "A small social network for you and your friends, with a private reading library.",
 };
 
 // Clerk's sign-in and account screens in kinnect's paper, ink and oxblood
@@ -39,8 +39,10 @@ const clerkAppearance = {
 // call refresh(), which re-renders this, so Accept and Decline update it.
 const pendingRequests = cache(getPendingRequestCount);
 
+// Your avatar, for the account button in the top bar. Same streaming as the
+// badge; ProfileSync makes the same (cached) lookup, so it's one query.
 function TopNav() {
-  return <NavBar requests={pendingRequests()} />;
+  return <NavBar requests={pendingRequests()} avatar={ensureProfile().then((p) => p?.avatar ?? null)} />;
 }
 
 function BottomNav() {
@@ -64,11 +66,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Suspense>
             {children}
           </main>
-          <footer className="border-t border-rule">
-            <p className="mx-auto max-w-2xl px-4 py-4 text-[15px] italic text-muted">
-              Your posts are for your friends. Your library is private.
-            </p>
-          </footer>
           <Suspense>
             <BottomNav />
             <RouteFocus />

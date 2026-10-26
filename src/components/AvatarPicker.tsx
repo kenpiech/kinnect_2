@@ -70,7 +70,7 @@ export function AvatarGate({ name }: { name: string }) {
       <h2 id="avatar-gate-title" className="text-2xl font-semibold tracking-tight">
         Welcome, {name.split(" ")[0]}. Pick your avatar
       </h2>
-      <p className="mt-2 text-muted">Classmates see it next to your name and your posts. You can change it later on Me.</p>
+      <p className="mt-2 text-muted">Friends see it next to your name and your posts. You can change it later on Me.</p>
       <div className="mt-5">
         <AvatarChoices value={choice} onChange={setChoice} />
       </div>
@@ -86,11 +86,21 @@ export function AvatarGate({ name }: { name: string }) {
   );
 }
 
-// On the Me page: change your avatar any time.
+// On the Me page: change your avatar any time. Folded behind "Change avatar"
+// (your current one is already at the top of the page), and it folds back up
+// once a new one is saved. Focus returns to the button either way.
 export function AvatarForm({ current }: { current: string | null }) {
+  const [open, setOpen] = useState(false);
   const [choice, setChoice] = useState<string | null>(current);
   const [busy, setBusy] = useState(false);
   const [toast, showToast] = useToast();
+  const toggle = useRef<HTMLButtonElement>(null);
+
+  function close() {
+    setOpen(false);
+    setChoice(current);
+    toggle.current?.focus();
+  }
 
   async function save() {
     if (!choice) return;
@@ -98,16 +108,38 @@ export function AvatarForm({ current }: { current: string | null }) {
     const result = await setAvatar(choice);
     setBusy(false);
     showToast(result.ok ? "Avatar saved." : result.error);
+    if (result.ok) {
+      setOpen(false);
+      toggle.current?.focus();
+    }
   }
 
   return (
-    <fieldset className="grid gap-4">
-      <legend className="label mb-3">Your avatar</legend>
-      <AvatarChoices value={choice} onChange={setChoice} />
-      <Button variant="secondary" className="justify-self-start" disabled={!choice || choice === current || busy} onClick={save}>
-        {busy ? "Saving…" : "Save avatar"}
-      </Button>
+    <section aria-labelledby="avatar-heading" className="grid gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="avatar-heading" className="label">
+          Your avatar
+        </h2>
+        <Button
+          ref={toggle}
+          variant="secondary"
+          aria-expanded={open}
+          aria-controls="avatar-choices"
+          onClick={() => (open ? close() : setOpen(true))}
+        >
+          {open ? "Cancel" : "Change avatar"}
+        </Button>
+      </div>
+      {open && (
+        <fieldset id="avatar-choices" className="grid gap-4">
+          <legend className="sr-only">Pick an avatar</legend>
+          <AvatarChoices value={choice} onChange={setChoice} />
+          <Button className="justify-self-start" disabled={!choice || choice === current || busy} onClick={save}>
+            {busy ? "Saving…" : "Save avatar"}
+          </Button>
+        </fieldset>
+      )}
       <Toast message={toast} />
-    </fieldset>
+    </section>
   );
 }

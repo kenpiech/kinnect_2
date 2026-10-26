@@ -14,6 +14,10 @@ export default function LibraryPage() {
       <Suspense fallback={<p className="text-muted">Opening your library…</p>}>
         <SavedLibrary />
       </Suspense>
+      {/* The privacy reminder lives only here and on Write, where it matters */}
+      <p className="border-t border-rule pt-4 text-[15px] italic text-muted">
+        Your posts are for your friends. Your library is private.
+      </p>
     </div>
   );
 }
