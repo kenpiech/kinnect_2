@@ -321,18 +321,16 @@ function SearchResults({
             ))}
           </ul>
           <p className="text-[15px] text-muted">
-            Not the book you&apos;re looking for? <AddToOpenLibrary />, the free, volunteer-built catalogue kinnect
-            searches.
+            Not the book you wanted? <AddToOpenLibrary />.
           </p>
         </>
       )}
 
       {search.kind === "none" && (
         <Banner title={`No books match “${search.q}”`}>
-          <p>Check the spelling, or try fewer words, like just the title or the author&apos;s last name.</p>
+          <p>Check the spelling, or try fewer words.</p>
           <p className="mt-2">
-            Still can&apos;t find it? kinnect searches Open Library, a free book catalogue built by volunteers, so
-            new books are sometimes missing. <AddToOpenLibrary />, and it&apos;ll show up here within a day or so.
+            New book? <AddToOpenLibrary />, the free catalogue kinnect searches.
           </p>
         </Banner>
       )}
