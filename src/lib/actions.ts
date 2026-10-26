@@ -7,6 +7,7 @@ import { isReadingStatus, OL_WORK_KEY, type Book } from "./books";
 import { ensureProfile } from "./data";
 import { MAX_POST, postLength } from "./posts";
 import { supabase } from "./supabase";
+import { PERSON_ID } from "./ids";
 
 // Server Actions: the browser calls these to change data. Every export here is
 // a public POST endpoint that anyone can call with any arguments, so each one
@@ -99,12 +100,11 @@ export async function removeBook(id: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-const CLERK_USER_ID = /^user_[A-Za-z0-9]+$/;
 
 export async function sendFriendRequest(addresseeId: string): Promise<ActionResult> {
   const { userId } = await auth();
   if (!userId) return SIGNED_OUT;
-  if (typeof addresseeId !== "string" || !CLERK_USER_ID.test(addresseeId) || addresseeId === userId) {
+  if (typeof addresseeId !== "string" || !PERSON_ID.test(addresseeId) || addresseeId === userId) {
     return { ok: false, error: "Couldn't find that person. Reload and retry." };
   }
   const db = await supabase();

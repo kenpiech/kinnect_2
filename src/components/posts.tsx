@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { FeedPost } from "@/lib/data";
 import { timeAgo } from "@/lib/posts";
 import { PostFooter } from "./PostFooter";
-import { Avatar } from "./ui";
+import { Avatar, BotTag } from "./ui";
 
 // One post in the feed: who, when, what they wrote, and the book it's about,
 // shown as its title and author under a bookmark-ribbon rule, then likes and
@@ -17,7 +17,7 @@ export function PostItem({ post, now }: { post: FeedPost; now: number }) {
       {/* A bigger tap target for the same link as the name. Hidden from
           keyboards and screen readers, so they meet the link only once. */}
       <Link href={profile} tabIndex={-1} aria-hidden="true" className="shrink-0 self-start rounded-full">
-        <Avatar name={post.authorName} avatar={post.authorAvatar} />
+        <Avatar name={post.authorName} avatar={post.authorAvatar} handle={post.authorBot ?? undefined} />
       </Link>
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-baseline gap-x-2 text-[15px] leading-snug">
@@ -27,6 +27,7 @@ export function PostItem({ post, now }: { post: FeedPost; now: number }) {
           >
             {post.mine ? "You" : post.authorName}
           </Link>
+          {post.authorBot && <BotTag />}
           <time dateTime={post.createdAt} title={at.toLocaleString("en-US")} className="text-muted">
             · {timeAgo(at.getTime(), now)}
           </time>

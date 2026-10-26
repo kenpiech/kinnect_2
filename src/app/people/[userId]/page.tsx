@@ -4,15 +4,13 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { PersonActions } from "@/components/PersonActions";
 import { PostItem } from "@/components/posts";
-import { Avatar, Banner, PageHeader } from "@/components/ui";
+import { Avatar, Banner, BotTag, PageHeader } from "@/components/ui";
 import { getPersonPage, type Person } from "@/lib/data";
+import { PERSON_ID } from "@/lib/ids";
 
 // A static title: a name in it would mean reading the database for metadata,
 // which can't sit in Suspense
 export const metadata: Metadata = { title: "Profile · kinnect" };
-
-// The same check the friend actions use
-const CLERK_USER_ID = /^user_[A-Za-z0-9]+$/;
 
 const STATUS: Record<Person["status"], string> = {
   friends: "Friends",
@@ -38,7 +36,7 @@ export default function PersonPage({ params }: PageProps<"/people/[userId]">) {
 }
 
 async function Profile({ userId }: { userId: string }) {
-  if (!CLERK_USER_ID.test(userId)) notFound();
+  if (!PERSON_ID.test(userId)) notFound();
   const { userId: me } = await auth();
   if (userId === me) redirect("/me");
 
@@ -60,9 +58,16 @@ async function Profile({ userId }: { userId: string }) {
     <>
       <div className="grid gap-4">
         <div className="flex items-center gap-4">
-          <Avatar name={person.name} avatar={person.avatar} size="lg" />
-          <PageHeader title={person.name}>{STATUS[person.status]}</PageHeader>
+          <Avatar name={person.name} avatar={person.avatar} handle={person.bot?.handle} size="lg" />
+          <PageHeader title={person.name}>
+            {person.bot && <BotTag />} {STATUS[person.status]}
+          </PageHeader>
         </div>
+        {person.bot && (
+          <p className="text-muted">
+            {person.bot.bio} <span className="italic">A sample account run by kinnect; its posts are written ahead of time.</span>
+          </p>
+        )}
         <PersonActions person={person} />
       </div>
 

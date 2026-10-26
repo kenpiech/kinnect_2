@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { acceptFriendRequest, removeFriendship, sendFriendRequest, type ActionResult } from "@/lib/actions";
 import type { Person } from "@/lib/data";
-import { Avatar, Button, Field, Toast, plural, useToast } from "./ui";
+import { Avatar, BotTag, Button, Field, Toast, plural, useToast } from "./ui";
 
 // The People tab: everyone on kinnect, grouped by how they're connected to
 // you. Requests for you come first, since they're waiting on you. A request
@@ -170,14 +170,15 @@ function Group({
 function PersonRow({ person, children }: { person: Person; children: React.ReactNode }) {
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-rule py-4">
-      <Avatar name={person.name} avatar={person.avatar} />
-      <p className="min-w-0 flex-1 break-words text-[17px] font-semibold">
+      <Avatar name={person.name} avatar={person.avatar} handle={person.bot?.handle} />
+      <p className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 break-words text-[17px] font-semibold">
         <Link
           href={`/people/${person.userId}`}
           className="inline-flex min-h-11 items-center underline decoration-line underline-offset-4 hover:decoration-ink"
         >
           {person.name}
         </Link>
+        {person.bot && <BotTag />}
       </p>
       <div className="flex items-center gap-1">{children}</div>
     </li>
