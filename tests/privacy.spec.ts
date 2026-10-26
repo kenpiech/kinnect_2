@@ -61,7 +61,7 @@ test("two readers who aren't friends can't see each other's posts or books", asy
   } finally {
     // Tidy up A's post and book, pass or fail
     await a.goto("/me");
-    const post = a.locator("article", { hasText: secret });
+    const post = a.locator("article:visible", { hasText: secret });
     await post.getByRole("button", { name: "Delete this post" }).click();
     await post.getByRole("button", { name: "Yes, delete" }).click();
     await expect(a.getByText(secret)).toHaveCount(0);
