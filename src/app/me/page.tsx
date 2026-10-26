@@ -66,7 +66,7 @@ async function Me() {
           Account
         </h2>
         <p className="text-[15px] text-muted">
-          Your email and passkeys are in the account menu (your initials, top right).
+          Your email and passkeys are in the account menu (your avatar, top right).
         </p>
         <SignOut />
       </section>

@@ -46,7 +46,7 @@ export function People({ people }: { people: Person[] }) {
       <div className="rounded-2xl border border-dashed border-line p-5">
         <p className="font-bold">You&apos;re the first one here</p>
         <p className="mt-1 text-muted">
-          Use Invite a classmate above to send them the link. Once they sign up, they&apos;ll show up here and you can add
+          Use Invite a friend above to send them the link. Once they sign up, they&apos;ll show up here and you can add
           each other.
         </p>
       </div>

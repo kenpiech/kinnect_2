@@ -5,7 +5,7 @@ import { useState } from "react";
 import { updateDisplayName } from "@/lib/actions";
 import { Button, Field, Toast, useToast } from "./ui";
 
-// Change the name classmates see. Errors sit under the field and keep what
+// Change the name people see. Errors sit under the field and keep what
 // you typed.
 export function NameForm({ current }: { current: string }) {
   const [name, setName] = useState(current);
@@ -27,7 +27,7 @@ export function NameForm({ current }: { current: string }) {
     <form onSubmit={submit} noValidate className="grid gap-4">
       <Field
         label="Your name"
-        hint="Shown to classmates on People and on your posts."
+        hint="Shown on People and on your posts."
         error={error}
         value={name}
         onChange={(e) => {
@@ -46,7 +46,7 @@ export function NameForm({ current }: { current: string }) {
 }
 
 // Sign out, in plain sight. (Clerk's account menu has it too, behind your
-// initials.)
+// avatar.)
 export function SignOut() {
   return (
     <SignOutButton redirectUrl="/">

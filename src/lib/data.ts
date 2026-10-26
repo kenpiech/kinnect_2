@@ -1,6 +1,7 @@
 import "server-only";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import type { QueryData } from "@supabase/supabase-js";
+import { cache } from "react";
 import type { LibraryItem } from "./database.types";
 import { supabase } from "./supabase";
 
@@ -11,10 +12,12 @@ import { supabase } from "./supabase";
 // Don't add .eq("user_id", …) filters that repeat a policy: the Playwright
 // test proves the policies work, and a duplicate filter would hide a broken one.
 
-// Gives the signed-in person a profile, so classmates can find them on People,
+// Gives the signed-in person a profile, so friends can find them on People,
 // and says whether they've picked an avatar yet. Runs on every full page load,
 // but only writes the first time. Null when signed out or Supabase failed.
-export async function ensureProfile(): Promise<{ avatar: string | null } | null> {
+// cache(): the avatar gate and the nav's account button both ask, and share
+// one lookup per request.
+export const ensureProfile = cache(async (): Promise<{ avatar: string | null } | null> => {
   const { userId } = await auth();
   if (!userId) return null;
 
@@ -42,7 +45,7 @@ export async function ensureProfile(): Promise<{ avatar: string | null } | null>
     return null;
   }
   return { avatar: null };
-}
+});
 
 // Your saved books, newest first. No user filter: the "read my library"
 // policy already returns only yours. Null means Supabase couldn't be reached.
@@ -162,12 +165,12 @@ function toFeedPost(p: PostRow, userId: string, saved: Set<string>): FeedPost {
     bookSaved: p.book_ol_key !== null && saved.has(p.book_ol_key),
     createdAt: p.created_at,
     authorId: p.user_id,
-    authorName: p.author?.display_name ?? "A classmate",
+    authorName: p.author?.display_name ?? "A friend",
     authorAvatar: p.author?.avatar ?? null,
     mine,
     likes: {
       mine: p.post_likes.some((l) => l.user_id === userId),
-      others: p.post_likes.filter((l) => l.user_id !== userId).map((l) => l.profiles?.display_name ?? "A classmate"),
+      others: p.post_likes.filter((l) => l.user_id !== userId).map((l) => l.profiles?.display_name ?? "A friend"),
     },
     comments: p.post_comments
       .toSorted((a, b) => a.created_at.localeCompare(b.created_at))
@@ -176,7 +179,7 @@ function toFeedPost(p: PostRow, userId: string, saved: Set<string>): FeedPost {
         body: c.body,
         createdAt: c.created_at,
         authorId: c.user_id,
-        authorName: c.profiles?.display_name ?? "A classmate",
+        authorName: c.profiles?.display_name ?? "A friend",
         authorAvatar: c.profiles?.avatar ?? null,
         mine: c.user_id === userId,
         canDelete: c.user_id === userId || mine,
@@ -266,7 +269,7 @@ function connection(
 
 export type PersonPage = { person: Person; posts: FeedPost[]; readAt: number };
 
-// One classmate's page: who they are, how you're connected, and their posts,
+// One person's page: who they are, how you're connected, and their posts,
 // newest first. userId must already be a valid Clerk user ID (the page checks).
 // Null means Supabase couldn't be reached; "missing" means no such person.
 //

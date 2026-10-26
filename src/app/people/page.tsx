@@ -11,7 +11,7 @@ export default function PeoplePage() {
   return (
     <div className="grid gap-8">
       <div className="grid gap-4">
-        <PageHeader title="People">Classmates on kinnect. Friends see each other&apos;s posts.</PageHeader>
+        <PageHeader title="People">Everyone on kinnect. Friends see each other&apos;s posts.</PageHeader>
         <InviteButton />
       </div>
       {/* Who's connected to you depends on who's asking, so it loads at request time */}
