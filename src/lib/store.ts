@@ -2,13 +2,15 @@ import { useSyncExternalStore } from "react";
 
 // The only things kinnect keeps in the browser: the post you're still writing,
 // so leaving Write doesn't lose it, a one-time message for the next page
-// ("Posted…"), and whether this device has a passkey. Everything else lives
-// in Supabase. Storage can be blocked (private browsing), so every read and
+// ("Posted…"), whether this device has a passkey, and the email you last
+// signed in with (to fill in the sign-in form). Everything else lives in
+// Supabase. Storage can be blocked (private browsing), so every read and
 // write is allowed to fail quietly.
 
 const DRAFT = "kinnect:draft";
 const FLASH = "kinnect:flash";
 const PASSKEY = "kinnect:passkey";
+const EMAIL = "kinnect:email";
 const listeners = new Set<() => void>();
 
 function read(store: Storage | undefined, key: string) {
@@ -73,4 +75,15 @@ export function hasPasskeyHere() {
 
 export function rememberPasskeyHere() {
   write(local(), PASSKEY, "yes");
+}
+
+// The email you last signed in with on this device. Clerk's email box is a
+// plain text field, which Safari only autofills from your contact card, so
+// the sign-in page fills it in from here instead. It never leaves the browser.
+export function savedEmail() {
+  return read(local(), EMAIL) ?? "";
+}
+
+export function rememberEmail(email: string) {
+  write(local(), EMAIL, email);
 }
