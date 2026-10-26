@@ -83,7 +83,7 @@ test("friends can like, comment, visit each other and save a book from a post", 
 
     // B sees it, saves the book from it, likes it and comments
     await b.goto("/feed");
-    const bPost = b.locator("article", { hasText: postText });
+    const bPost = b.locator("article:visible", { hasText: postText });
     await expect(bPost, "B sees a friend's post").toBeVisible();
     await bPost.getByRole("button", { name: new RegExp(`^Save book ${escape(title)}`) }).click();
     await expect(bPost.getByRole("link", { name: "In your library" })).toBeVisible();
@@ -124,7 +124,7 @@ test("friends can like, comment, visit each other and save a book from a post", 
 
     // A sees the like and the comment, and removes the comment
     await a.goto("/feed");
-    const aPost = a.locator("article", { hasText: postText });
+    const aPost = a.locator("article:visible", { hasText: postText });
     await expect(aPost.getByText(`Liked by ${nameB}`)).toBeVisible();
     await expect(aPost.getByText(commentText)).toBeVisible();
     await aPost.getByRole("button", { name: "Delete this comment" }).click();
@@ -144,7 +144,7 @@ test("friends can like, comment, visit each other and save a book from a post", 
     // before counting: count() doesn't wait.
     await a.goto("/me");
     await expect(a.getByRole("heading", { name: "Your posts" })).toBeVisible();
-    const mine = a.locator("article", { hasText: postText });
+    const mine = a.locator("article:visible", { hasText: postText });
     if (await mine.count()) {
       await mine.getByRole("button", { name: "Delete this post" }).click();
       await mine.getByRole("button", { name: "Yes, delete" }).click();

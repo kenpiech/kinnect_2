@@ -55,13 +55,9 @@ html body {
   line-height: 1.3;
 }
 
-/* Clerk's sign-in and sign-up cards, trimmed on their first step only (later
-   steps, like "Check your email", keep their headings). Sign in with the
-   passkey button first: the page's own "Welcome back" is the heading, so
-   Clerk's header goes. Otherwise Clerk's title stays and only its filler
-   subtitle goes, on both cards. */
-main:has(#passkey-heading) .cl-signIn-start .cl-header,
-.cl-signIn-start .cl-headerSubtitle,
+/* Clerk's sign-up card, trimmed on its first step only (later steps, like
+   "Check your email", keep theirs): the title stays, the filler subtitle
+   goes. Sign in is kinnect's own form (SignInOptions). */
 .cl-signUp-start .cl-headerSubtitle {
   display: none;
 }
