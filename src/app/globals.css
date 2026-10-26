@@ -42,10 +42,17 @@ html body {
   line-height: 1.6;
 }
 
-/* One focus ring for every control */
-:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+/* One focus ring for every control. Not for tabindex="-1": that's a page's
+   title or <main>, which kinnect focuses after navigating so screen readers
+   start at the top. They aren't controls, and Safari would otherwise draw the
+   ring around the title as the page opens. */
+:where(a, button, input, textarea, select, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 3px;
+}
+
+:where([tabindex="-1"]):focus {
+  outline: none;
 }
 
 /* Small label for fields, tabs and section kickers. Sentence case, not shouty. */
