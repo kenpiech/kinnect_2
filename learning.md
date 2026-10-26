@@ -401,6 +401,7 @@ The policy was loose for under a minute. After restoring, Postgres confirmed the
 - The test readers' emails (`lib2-reader-…`), because they're existing Clerk accounts.
 - Migrations already applied, the saved test evidence, and the history above.
 - The live address `lib-2-app.vercel.app`, because a passkey only works on the address it was made on. Moving to a Kinnect address is my decision to make.
+  - **Decided (2026-10-25):** the primary address is now **https://kinnect-2.vercel.app**. The old one redirects there. Passkeys made on the old address stopped working, which (together with Clerk's sign-in form asking for a passkey after the email step) is why sign-in became kinnect's own email-code form.
 
 ## All lowercase: kinnect
 
