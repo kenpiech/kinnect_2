@@ -499,3 +499,7 @@ I asked for "Add a book from your library" to be collapsed by default. It's now 
 | 5 | Saving a book from a friend's post: where does the title come from, and what stops a faked post? | The post carries a copy of the book's details, which lives in the posts table that friends can read. | **Partly.** First half right: the server copies the book from the post, read under the posts policy, never from the friend's private library. Missing: the posts insert policy makes the database check that a post's book exactly matches a row in the author's own library, so a post sent straight to the Data API can't carry a forged title or cover. |
 
 **Takeaway:** solid on keys, RLS and why the red run matters. The two gaps were the *specific* reasons for the server-side API call, and that the database (not just the app) validates a post's book.
+
+## AGENTS.md loads: verified with `/context`
+
+In a fresh `claude` session inside `kinnect_2`, `/context` showed **Memory files: 1 file · 6k tokens**, and I confirmed it is `AGENTS.md`. There's no CLAUDE.md in the repo, the folder above it, or my home folder, so AGENTS.md is the only instructions file loaded, and its size (17.5 KB) matches the 6k tokens shown.
