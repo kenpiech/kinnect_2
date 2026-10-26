@@ -522,3 +522,11 @@ In a fresh `claude` session inside `kinnect_2`, `/context` showed **Memory files
 **Caught:**
 - **The live site showed bots with initials** for a few minutes, because the database change went live before the app code that knows about bot drawings. Next time, ship the code that reads new columns first, then the data.
 - **The badge test broke because of real people.** A friend of mine sent Test Reader B a request, so B's badge said 2 instead of 1. The test now counts the requests in B's list, instead of assuming nobody else exists.
+
+## Feature · Likes on comments (my idea)
+
+A heart under each comment, like the one on posts. The new `comment_likes` table follows the same rule as everything else: if you can see the comment, you can see its likes and add your own. Its policies say "a comment I can see" with `exists (select 1 from post_comments …)`, which runs under the comments read policy, which in turn reuses the posts read policy, so who sees what is still defined in one place. A rolled-back simulation confirmed you can like once, can't edit a like, and someone who can't see the post can't see, add or forge a like. The friends test now likes a comment and checks it's saved.
+
+**Caught: adding the table broke every feed on the live site for a few minutes.** `comment_likes` links comments to profiles a second way ("people who liked it"), so PostgREST could no longer tell which link `profiles(…)` inside a comment meant, and the feed and Me pages showed "couldn't reach its database". The same ambiguity had happened with post likes. Fixed by naming the link (`profiles!post_comments_user_id_fkey`). Lesson: a new junction table can break existing queries, so check the main pages right after the migration, before the code ships.
+
+**Also caught:** running `npm run build` while the dev server was up slowed the next test run enough to time out a click, and Open Library dropped out twice mid-run. Both interrupted the friends test before its cleanup, so I deleted its leftovers by ID.
