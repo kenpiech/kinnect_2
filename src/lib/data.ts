@@ -117,6 +117,8 @@ export type PostComment = {
   mine: boolean;
   // Your own comment, or any comment on your post
   canDelete: boolean;
+  // Whether you liked it, and how many people did in all
+  likes: { mine: boolean; count: number };
 };
 
 export type FeedPost = {
@@ -143,12 +145,13 @@ export type FeedPost = {
 
 // A post with its author, likes and comments, in one request. The likes and
 // comments come back only for posts you can see: their policies reuse the
-// posts read policy. The author needs the !posts_user_id_fkey hint because
-// post_likes also links posts to profiles (as "people who liked it").
+// posts read policy. Authors need the !…_user_id_fkey hints because the like
+// tables link posts and comments to profiles a second way (as "people who
+// liked it"), which PostgREST can't tell apart from "who wrote it".
 const POST_FIELDS = `id, body, book_ol_key, book_title, book_author, created_at, user_id,
   author:profiles!posts_user_id_fkey(display_name, avatar, bot_handle),
   post_likes(user_id, profiles(display_name)),
-  post_comments(id, body, created_at, user_id, profiles(display_name, avatar))`;
+  post_comments(id, body, created_at, user_id, profiles!post_comments_user_id_fkey(display_name, avatar), comment_likes(user_id))`;
 
 type Db = Awaited<ReturnType<typeof supabase>>;
 const postQuery = (db: Db) => db.from("posts").select(POST_FIELDS);
@@ -189,6 +192,7 @@ function toFeedPost(p: PostRow, userId: string, saved: Set<string>): FeedPost {
         authorAvatar: c.profiles?.avatar ?? null,
         mine: c.user_id === userId,
         canDelete: c.user_id === userId || mine,
+        likes: { mine: c.comment_likes.some((l) => l.user_id === userId), count: c.comment_likes.length },
       })),
   };
 }

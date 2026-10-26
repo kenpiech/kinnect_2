@@ -306,6 +306,45 @@ export async function unlikePost(postId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
+// Liking a comment works like liking a post: the comment's own read policy
+// (which reuses the post's) decides whether you may.
+const COMMENT_GONE: ActionResult = { ok: false, error: "That comment isn't available anymore. Reload to see the latest." };
+
+export async function likeComment(commentId: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof commentId !== "string" || !UUID.test(commentId)) return COMMENT_GONE;
+
+  const db = await supabase();
+  // user_id fills itself in from the session token
+  const { error } = await db.from("comment_likes").insert({ comment_id: commentId });
+  // 23505: already liked, which is what you wanted
+  if (error?.code === "42501" || error?.code === "23503") return COMMENT_GONE;
+  if (error && error.code !== "23505") {
+    console.error("Couldn't like comment:", error.message);
+    return { ok: false, error: "Couldn't like it. Try again." };
+  }
+  refresh();
+  return { ok: true };
+}
+
+export async function unlikeComment(commentId: string): Promise<ActionResult> {
+  const { userId } = await auth();
+  if (!userId) return SIGNED_OUT;
+  if (typeof commentId !== "string" || !UUID.test(commentId)) return COMMENT_GONE;
+
+  const db = await supabase();
+  // Names the comment, not the person: the "unlike a comment" policy only lets
+  // this delete my own like
+  const { error } = await db.from("comment_likes").delete().eq("comment_id", commentId);
+  if (error) {
+    console.error("Couldn't unlike comment:", error.message);
+    return { ok: false, error: "Couldn't take back your like. Try again." };
+  }
+  refresh();
+  return { ok: true };
+}
+
 export async function addComment(input: { postId: string; body: string }): Promise<ActionResult> {
   const { userId } = await auth();
   if (!userId) return SIGNED_OUT;

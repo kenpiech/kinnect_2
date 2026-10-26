@@ -2,8 +2,17 @@
 
 import Link from "next/link";
 import { useOptimistic, useRef, useState, useTransition } from "react";
-import { addComment, deleteComment, deletePost, likePost, saveBookFromPost, unlikePost } from "@/lib/actions";
-import type { FeedPost } from "@/lib/data";
+import {
+  addComment,
+  deleteComment,
+  deletePost,
+  likeComment,
+  likePost,
+  saveBookFromPost,
+  unlikeComment,
+  unlikePost,
+} from "@/lib/actions";
+import type { FeedPost, PostComment } from "@/lib/data";
 import { MAX_POST, postLength, timeAgo } from "@/lib/posts";
 import { ConfirmDelete } from "./ConfirmDelete";
 import { Avatar, Button, ButtonLink, Field } from "./ui";
@@ -104,11 +113,10 @@ export function PostFooter({ post, now }: { post: FeedPost; now: number }) {
                   </p>
                   <p className="whitespace-pre-wrap break-words text-[16px] leading-relaxed">{c.body}</p>
                 </div>
-                {c.canDelete && (
-                  <div className="-ml-2">
-                    <ConfirmDelete what="this comment" remove={() => deleteComment(c.id)} />
-                  </div>
-                )}
+                <div className="-ml-2 flex flex-wrap items-center gap-1">
+                  <CommentLike comment={c} />
+                  {c.canDelete && <ConfirmDelete what="this comment" remove={() => deleteComment(c.id)} />}
+                </div>
               </div>
             </li>
           ))}
@@ -117,6 +125,48 @@ export function PostFooter({ post, now }: { post: FeedPost; now: number }) {
 
       {writing && <CommentBox postId={post.id} onDone={() => setWriting(false)} />}
     </div>
+  );
+}
+
+// The heart under a comment: the same instant flip as a post's, smaller. The
+// count is everyone who liked it, you included.
+function CommentLike({ comment }: { comment: PostComment }) {
+  const [, startTransition] = useTransition();
+  const [liked, setLiked] = useOptimistic(comment.likes.mine);
+  const [error, setError] = useState<string | null>(null);
+  const count = comment.likes.count - (comment.likes.mine ? 1 : 0) + (liked ? 1 : 0);
+
+  function toggle() {
+    const next = !liked;
+    setError(null);
+    startTransition(async () => {
+      setLiked(next);
+      const result = next ? await likeComment(comment.id) : await unlikeComment(comment.id);
+      if (!result.ok) setError(result.error);
+    });
+  }
+
+  return (
+    <>
+      <Button
+        variant="quiet"
+        aria-pressed={liked}
+        onClick={toggle}
+        className={`min-h-9 text-[14px] no-underline ${liked ? "text-accent" : "text-muted"}`}
+      >
+        <span aria-hidden="true" className="text-base leading-none">
+          {liked ? "♥" : "♡"}
+        </span>
+        {liked ? "Liked" : "Like"}
+        <span className="sr-only"> {comment.mine ? "your comment" : `${comment.authorName}'s comment`}</span>
+        {count > 0 && <span className="font-normal">· {count}</span>}
+      </Button>
+      {error && (
+        <p role="alert" className="text-[14px] text-danger">
+          {error}
+        </p>
+      )}
+    </>
   );
 }
 
