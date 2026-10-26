@@ -134,6 +134,15 @@ test("friends can like, comment, visit each other and save a book from a post", 
     const aPost = a.locator("article:visible", { hasText: postText });
     await expect(aPost.getByText(`Liked by ${nameB}`)).toBeVisible();
     await expect(aPost.getByText(commentText)).toBeVisible();
+
+    // A likes B's comment, and the like is saved
+    await clickAndSave(a, aPost.getByRole("button", { name: new RegExp(`^Like ${escape(nameB)}'s comment`) }));
+    await a.reload();
+    await expect(aPost.getByRole("button", { name: new RegExp(`^Liked ${escape(nameB)}'s comment · 1`) })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
     await aPost.getByRole("button", { name: "Delete this comment" }).click();
     await aPost.getByRole("button", { name: "Yes, delete" }).click();
     await expect(aPost.getByText(commentText), "the author removed it").toHaveCount(0);
