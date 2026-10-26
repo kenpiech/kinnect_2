@@ -5,7 +5,7 @@ import Link from "next/link";
 import { forwardRef, useCallback, useEffect, useId, useState } from "react";
 
 // Shared building blocks. Every page uses these instead of styling its own
-// buttons, fields or notices, so Kinnect looks and behaves the same everywhere.
+// buttons, fields or notices, so kinnect looks and behaves the same everywhere.
 
 type Variant = "primary" | "secondary" | "quiet";
 
@@ -181,9 +181,8 @@ export function useToast() {
   return [message, show, hide] as const;
 }
 
-export function plural(n: number, word: string) {
-  return `${n} ${word}${n === 1 ? "" : "s"}`;
-}
+// Lives in src/lib/format.ts so server components can call it too
+export { plural } from "@/lib/format";
 
 export function PageHeader({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
@@ -196,21 +195,24 @@ export function PageHeader({ title, children }: { title: string; children?: Reac
   );
 }
 
-// A cartoon portrait (public/avatars, drawn by scripts/avatars.py): one for
-// each sample friend, and "me" for you.
-export function Avatar({ name, handle, size = "md" }: { name: string; handle?: string; size?: "md" | "lg" }) {
-  const box = size === "lg" ? "size-16" : "size-12";
-  if (handle) {
-    return (
-      <Image
-        src={`/avatars/${handle}.svg`}
-        alt=""
-        width={64}
-        height={64}
-        unoptimized
-        className={`${box} shrink-0 rounded-full`}
-      />
-    );
+// A cartoon portrait: the one a person picked (public/avatars/readers, drawn
+// by scripts/reader_avatars.py), or a sample friend's on the landing page
+// (public/avatars, by scripts/avatars.py). Initials until someone has picked.
+export function Avatar({
+  name,
+  avatar,
+  handle,
+  size = "md",
+}: {
+  name: string;
+  avatar?: string | null;
+  handle?: string;
+  size?: "sm" | "md" | "lg";
+}) {
+  const box = size === "lg" ? "size-16" : size === "sm" ? "size-9" : "size-12";
+  const src = avatar ? `/avatars/readers/${avatar}.svg` : handle ? `/avatars/${handle}.svg` : null;
+  if (src) {
+    return <Image src={src} alt="" width={64} height={64} unoptimized className={`${box} shrink-0 rounded-full`} />;
   }
   const initials = name
     .split(/\s+/)
@@ -221,7 +223,7 @@ export function Avatar({ name, handle, size = "md" }: { name: string; handle?: s
   return (
     <span
       aria-hidden="true"
-      className={`${box} grid shrink-0 place-items-center rounded-full bg-ink font-bold text-paper ${size === "lg" ? "text-lg" : "text-sm"}`}
+      className={`${box} grid shrink-0 place-items-center rounded-full bg-ink font-bold text-paper ${size === "lg" ? "text-lg" : size === "sm" ? "text-xs" : "text-sm"}`}
     >
       {initials}
     </span>

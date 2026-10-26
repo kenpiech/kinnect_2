@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of a ninja">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 0.6s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#cfd8e3"/>
+
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#26232a" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#e3ae86" stroke="#2b2620" stroke-width="2.5"/>
+
+<circle cx="38" cy="59" r="5.5" fill="#e3ae86" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#e3ae86" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#e3ae86" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="45" cy="66" r="4.5" fill="#e8907a" opacity=".35"/><circle cx="75" cy="66" r="4.5" fill="#e8907a" opacity=".35"/>
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 54 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="3" stroke-linecap="round"/><path d="M64 52 q5 -3 10 2" fill="none" stroke="#2b2620" stroke-width="3" stroke-linecap="round"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+
+<path d="M52 69 q8 6 16 0" fill="none" stroke="#2b2620" stroke-width="2.4" stroke-linecap="round"/>
+<path fill-rule="evenodd" d="M60 25 C87 25 91 48 89 64 C88 78 85 86 81 92 L39 92 C35 86 32 78 31 64 C29 48 33 25 60 25 Z M41 52 Q60 47 79 52 L79 63 Q60 68 41 63 Z" fill="#26232a" stroke="#2b2620" stroke-width="2.5"/><rect x="33" y="41" width="54" height="7" rx="3" fill="#c2372e" stroke="#2b2620" stroke-width="2"/><path d="M85 44 l15 -7 l-3 7 l13 3 l-15 4 z" fill="#c2372e" stroke="#2b2620" stroke-width="2"/>
+</g>
+</svg>

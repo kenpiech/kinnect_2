@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of a reader with a full beard">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 0.9s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#efe3c2"/>
+
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#55703f" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#8a5634" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M48 86 l12 14 l12 -14" fill="none" stroke="#2b2620" stroke-width="2.2"/>
+<circle cx="38" cy="59" r="5.5" fill="#8a5634" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#8a5634" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#8a5634" stroke="#2b2620" stroke-width="2.5"/>
+
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 49 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="3.2" stroke-linecap="round"/><path d="M64 49 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="3.2" stroke-linecap="round"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+<path d="M40 64 C40 82 50 87 60 87 C70 87 80 82 80 64 C76 74 70 76 60 76 C50 76 44 74 40 64 Z" fill="#2a1c15" stroke="#2b2620" stroke-width="2.2"/><path d="M50 38 q6 -3 12 0" fill="none" stroke="#fff" stroke-width="2" opacity=".35" stroke-linecap="round"/>
+<path d="M53 70 q7 5 14 0" fill="none" stroke="#f3eddf" stroke-width="2.4" stroke-linecap="round"/>
+
+</g>
+</svg>

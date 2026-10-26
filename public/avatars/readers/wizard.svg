@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of a wizard">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 1.7s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#e6e0f2"/>
+
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#3b4f9a" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#efcfb4" stroke="#2b2620" stroke-width="2.5"/>
+
+<circle cx="38" cy="59" r="5.5" fill="#efcfb4" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#efcfb4" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#efcfb4" stroke="#2b2620" stroke-width="2.5"/>
+
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 49 q5 -3 10 0" fill="none" stroke="#e9e5dc" stroke-width="3.6" stroke-linecap="round"/><path d="M64 49 q5 -3 10 0" fill="none" stroke="#e9e5dc" stroke-width="3.6" stroke-linecap="round"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+<path d="M40 64 C38 92 50 106 60 108 C70 106 82 92 80 64 C76 74 70 76 60 76 C50 76 44 74 40 64 Z" fill="#f1eee8" stroke="#2b2620" stroke-width="2.2"/><path d="M48 70 C52 65 58 66 60 68 C62 66 68 65 72 70 C68 73 63 72 60 71 C57 72 52 73 48 70 Z" fill="#f1eee8" stroke="#2b2620" stroke-width="2"/>
+<path d="M56 76 q4 3 8 0" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+<path d="M28 44 C40 37 80 37 92 44 C80 49 40 49 28 44 Z" fill="#26357a" stroke="#2b2620" stroke-width="2.5"/><path d="M40 43 C48 28 50 10 68 1 C62 16 72 30 80 43 Z" fill="#2f3f86" stroke="#2b2620" stroke-width="2.5"/><path d="M58 26 l1.5 3 3 .5 -2.2 2 .6 3 -2.9 -1.5 -2.9 1.5 .6 -3 -2.2 -2 3 -.5 z" fill="#e8c95a"/><circle cx="68" cy="34" r="1.8" fill="#e8c95a"/><circle cx="62" cy="14" r="1.5" fill="#e8c95a"/>
+</g>
+</svg>

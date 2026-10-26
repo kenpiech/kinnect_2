@@ -1,0 +1,49 @@
+# Run with the posts read policy loosened to: using (true)   (2026-10-24 23:39 CDT)
+
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/global.setup.ts:10:6 › Clerk testing token and test users (428ms)
+  ✘  2 [privacy] › tests/privacy.spec.ts:41:5 › two readers who aren't friends can't see each other's posts or books (36.2s)
+
+
+  1) [privacy] › tests/privacy.spec.ts:41:5 › two readers who aren't friends can't see each other's posts or books 
+
+    Error: B must not see A's post
+
+    expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByText('A\'s private test post 1792903163043')
+    Expected: 0
+    Received: 1
+    Timeout:  15000ms
+
+    Call log:
+      - B must not see A's post getByText('A\'s private test post 1792903163043') with timeout 15000ms
+      - waiting for getByText('A\'s private test post 1792903163043')
+        34 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      68 |     await pickAvatarIfAsked(b);
+      69 |     await expect(b.getByText("What are you reading?")).toBeVisible();
+    > 70 |     await expect(b.getByText(secret), "B must not see A's post").toHaveCount(0);
+         |                                                                  ^
+      71 |
+      72 |     await b.goto("/library");
+      73 |     await expect(b.getByRole("heading", { name: "Your library" })).toBeVisible();
+        at /Users/kwp/dev/clauding_around/kinnect_2/tests/privacy.spec.ts:70:66
+
+    Error Context: test-results/privacy-two-readers-who-ar-d9d9e-each-other-s-posts-or-books-privacy/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/privacy-two-readers-who-ar-d9d9e-each-other-s-posts-or-books-privacy/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/privacy-two-readers-who-ar-d9d9e-each-other-s-posts-or-books-privacy/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [privacy] › tests/privacy.spec.ts:41:5 › two readers who aren't friends can't see each other's posts or books 
+  1 passed (37.6s)

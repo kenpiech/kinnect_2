@@ -189,7 +189,8 @@ people["me"] = svg(
     front=f'<path d="M37 52 C34 30 52 26 62 30 C72 26 88 32 83 52 C80 42 74 38 66 40 C58 36 46 40 37 52 Z" fill="#4a3426" stroke="{INK}" stroke-width="2.5"/>',
 )
 
-OUT.mkdir(parents=True, exist_ok=True)
-for handle, content in people.items():
-    (OUT / f"{handle}.svg").write_text(content)
-print("wrote", len(people), "avatars to", OUT)
+if __name__ == "__main__":
+    OUT.mkdir(parents=True, exist_ok=True)
+    for handle, content in people.items():
+        (OUT / f"{handle}.svg").write_text(content)
+    print("wrote", len(people), "avatars to", OUT)

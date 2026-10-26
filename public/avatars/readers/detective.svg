@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of a detective">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 3.0s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#ece3cf"/>
+
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#c9b28a" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#c58c64" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M44 86 L60 104 L50 122 L30 122 L34 98 Z M76 86 L60 104 L70 122 L90 122 L86 98 Z" fill="#b89c70" stroke="#2b2620" stroke-width="2.2"/><path d="M54 92 l6 8 l6 -8" fill="#3a2f25" stroke="#2b2620" stroke-width="1.8"/><circle cx="89" cy="96" r="10" fill="#cfe6ef" fill-opacity=".7" stroke="#2b2620" stroke-width="3"/><path d="M82 103 l-10 12" stroke="#5a4a38" stroke-width="5" stroke-linecap="round"/>
+<circle cx="38" cy="59" r="5.5" fill="#c58c64" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#c58c64" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#c58c64" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="45" cy="66" r="4.5" fill="#e8907a" opacity=".35"/><circle cx="75" cy="66" r="4.5" fill="#e8907a" opacity=".35"/>
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 48 q5 -3 10 0" fill="none" stroke="#2b2620" stroke-width="3" stroke-linecap="round"/><path d="M64 50 q5 -3 10 -2" fill="none" stroke="#2b2620" stroke-width="3" stroke-linecap="round"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+
+<path d="M53 70 q8 4 15 -1" fill="none" stroke="#2b2620" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M40 43 C40 26 80 26 80 43 Z" fill="#6b5a45" stroke="#2b2620" stroke-width="2.5"/><path d="M50 30 q10 6 20 0" fill="none" stroke="#54462f" stroke-width="2"/><rect x="40" y="37" width="40" height="6" fill="#3a2f25"/><path d="M26 45 C40 38 80 38 94 45 C80 51 40 51 26 45 Z" fill="#5a4a38" stroke="#2b2620" stroke-width="2.5"/>
+</g>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Cartoon of a reader with red hair and freckles">
+<style>
+.eyes{transform-origin:60px 58px;animation:blink 5.5s infinite 2.9s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@media (prefers-reduced-motion:reduce){.eyes{animation:none}}
+</style>
+<defs><clipPath id="c"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+<g clip-path="url(#c)" stroke-linejoin="round">
+<rect width="120" height="120" fill="#f6e3b4"/>
+<path d="M32 82 C26 50 36 30 60 30 C84 30 94 50 88 82 C84 92 78 90 78 82 L42 82 C42 90 36 92 32 82 Z" fill="#c4602f" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M12 122 C14 96 36 86 60 86 C84 86 106 96 108 122 Z" fill="#3f7d6e" stroke="#2b2620" stroke-width="2.5"/>
+<path d="M51 72 h18 v15 c-5 5 -13 5 -18 0 z" fill="#f6d3b8" stroke="#2b2620" stroke-width="2.5"/>
+
+<circle cx="38" cy="59" r="5.5" fill="#f6d3b8" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="82" cy="59" r="5.5" fill="#f6d3b8" stroke="#2b2620" stroke-width="2.5"/>
+<ellipse cx="60" cy="57" rx="22" ry="25" fill="#f6d3b8" stroke="#2b2620" stroke-width="2.5"/>
+<circle cx="45" cy="66" r="4.5" fill="#e8907a" opacity=".35"/><circle cx="75" cy="66" r="4.5" fill="#e8907a" opacity=".35"/>
+<g class="eyes"><ellipse cx="51" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/><ellipse cx="69" cy="58" rx="2.6" ry="3.3" fill="#2b2620"/></g>
+<path d="M46 50 q5 -3 10 0" fill="none" stroke="#9c4a24" stroke-width="2.6" stroke-linecap="round"/><path d="M64 50 q5 -3 10 0" fill="none" stroke="#9c4a24" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M60 60 q-3 5 0 6.5" fill="none" stroke="#2b2620" stroke-width="2" stroke-linecap="round"/>
+<circle cx="46" cy="63" r="1.1" fill="#b9774d"/><circle cx="49" cy="65" r="1.1" fill="#b9774d"/><circle cx="52" cy="63" r="1.1" fill="#b9774d"/><circle cx="68" cy="63" r="1.1" fill="#b9774d"/><circle cx="71" cy="65" r="1.1" fill="#b9774d"/><circle cx="74" cy="63" r="1.1" fill="#b9774d"/>
+<path d="M51 69 q9 7 18 0" fill="none" stroke="#2b2620" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M37 52 C38 32 56 26 70 32 C80 36 84 44 83 52 C76 42 64 38 52 44 C46 46 40 48 37 52 Z" fill="#c4602f" stroke="#2b2620" stroke-width="2.5"/>
+</g>
+</svg>
