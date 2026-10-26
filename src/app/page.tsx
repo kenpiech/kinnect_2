@@ -10,10 +10,10 @@ export default function Landing() {
     <div className="grid gap-10">
       <section className="grid gap-4">
         <h1 tabIndex={-1} className="text-[2rem] font-semibold leading-tight tracking-tight outline-offset-4 sm:text-5xl">
-          Keep up with your friends, not bots.
+          Keep up with your friends.
         </h1>
         <p className="text-muted sm:text-lg">
-          Post, comment and keep a private reading list. No photos, no algorithm.
+          Just your friends&apos; posts, newest first. No algorithm or promoted posts pulling you away.
         </p>
         <div className="flex flex-wrap gap-3">
           <ButtonLink href="/sign-up">Sign up</ButtonLink>
