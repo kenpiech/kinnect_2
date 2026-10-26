@@ -55,12 +55,19 @@ test("friends can like, comment, visit each other and save a book from a post", 
 
     await b.goto("/people");
     await pickAvatarIfAsked(b);
-    // B's People tab shows the waiting request, and stops once it's accepted
+    // B's People tab counts the waiting requests, and drops by one once A's is
+    // accepted. Counted from the list, since real members may also have asked
+    // the test readers to be friends.
     const peopleTab = b.getByRole("navigation", { name: "Main" }).getByRole("link", { name: /^People/ });
-    await expect(peopleTab).toHaveAccessibleName(/People\W*1 friend request$/);
+    const waiting = b.getByRole("region", { name: "Requests for you" }).getByRole("listitem");
+    await expect(waiting.filter({ hasText: nameA })).toHaveCount(1);
+    const waitingCount = await waiting.count();
+    const badge = (n: number) => new RegExp(`People\\W*${n} friend requests?$`);
+    await expect(peopleTab).toHaveAccessibleName(badge(waitingCount));
     await b.getByRole("button", { name: `Accept ${nameA}` }).click();
     await expect(b.getByRole("region", { name: "Friends" })).toContainText(nameA);
-    await expect(peopleTab).not.toHaveAccessibleName(/friend request/);
+    if (waitingCount === 1) await expect(peopleTab).not.toHaveAccessibleName(/friend request/);
+    else await expect(peopleTab).toHaveAccessibleName(badge(waitingCount - 1));
 
     // A saves a book and posts about it
     await a.goto("/library");

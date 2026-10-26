@@ -207,18 +207,24 @@ export type Database = {
       profiles: {
         Row: {
           avatar: string | null;
+          bot_bio: string | null;
+          bot_handle: string | null;
           created_at: string;
           display_name: string;
           user_id: string;
         };
         Insert: {
           avatar?: string | null;
+          bot_bio?: string | null;
+          bot_handle?: string | null;
           created_at?: string;
           display_name: string;
           user_id?: string;
         };
         Update: {
           avatar?: string | null;
+          bot_bio?: string | null;
+          bot_handle?: string | null;
           created_at?: string;
           display_name?: string;
           user_id?: string;

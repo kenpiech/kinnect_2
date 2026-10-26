@@ -198,6 +198,16 @@ export function PageHeader({ title, children }: { title: string; children?: Reac
 // A cartoon portrait: the one a person picked (public/avatars/readers, drawn
 // by scripts/reader_avatars.py), or a sample friend's on the landing page
 // (public/avatars, by scripts/avatars.py). Initials until someone has picked.
+// Marks one of kinnect's labelled bots wherever their name appears, so nobody
+// mistakes them for a real person. Plain text, so screen readers say "Bot" too.
+export function BotTag() {
+  return (
+    <span className="inline-flex items-center rounded-full border border-line px-2 text-[13px] font-semibold leading-5 text-muted">
+      Bot
+    </span>
+  );
+}
+
 export function Avatar({
   name,
   avatar,

@@ -3,6 +3,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import type { QueryData } from "@supabase/supabase-js";
 import { cache } from "react";
 import type { LibraryItem } from "./database.types";
+import { PERSON_ID } from "./ids";
 import { supabase } from "./supabase";
 
 // Reads and server-side writes for server components. These aren't Server
@@ -63,6 +64,8 @@ export type Person = {
   userId: string;
   name: string;
   avatar: string | null;
+  // Set for kinnect's labelled bots: the handle picks their drawing
+  bot: { handle: string; bio: string | null } | null;
   // How you're connected: not yet, you asked them, they asked you, or friends
   status: "none" | "sent" | "received" | "friends";
   // The friendship row, for Accept and Remove
@@ -78,7 +81,7 @@ export async function getPeople(): Promise<Person[] | null> {
   if (!userId) return null;
   const db = await supabase();
   const [profiles, friendships] = await Promise.all([
-    db.from("profiles").select("user_id, display_name, avatar").order("display_name"),
+    db.from("profiles").select("user_id, display_name, avatar, bot_handle, bot_bio").order("display_name"),
     db.from("friendships").select("id, requester_id, addressee_id, status"),
   ]);
   if (profiles.error || friendships.error) {
@@ -100,7 +103,7 @@ export async function getPeople(): Promise<Person[] | null> {
           : f.requester_id === userId
             ? "sent"
             : "received";
-      return { userId: p.user_id, name: p.display_name, avatar: p.avatar, status, friendshipId: f?.id ?? null };
+      return { userId: p.user_id, name: p.display_name, avatar: p.avatar, bot: botOf(p), status, friendshipId: f?.id ?? null };
     });
 }
 
@@ -129,6 +132,8 @@ export type FeedPost = {
   authorId: string;
   authorName: string;
   authorAvatar: string | null;
+  // The author's handle if they're one of kinnect's labelled bots
+  authorBot: string | null;
   mine: boolean;
   // Whether you liked it, and the names of everyone else who did
   likes: { mine: boolean; others: string[] };
@@ -141,7 +146,7 @@ export type FeedPost = {
 // posts read policy. The author needs the !posts_user_id_fkey hint because
 // post_likes also links posts to profiles (as "people who liked it").
 const POST_FIELDS = `id, body, book_ol_key, book_title, book_author, created_at, user_id,
-  author:profiles!posts_user_id_fkey(display_name, avatar),
+  author:profiles!posts_user_id_fkey(display_name, avatar, bot_handle),
   post_likes(user_id, profiles(display_name)),
   post_comments(id, body, created_at, user_id, profiles(display_name, avatar))`;
 
@@ -167,6 +172,7 @@ function toFeedPost(p: PostRow, userId: string, saved: Set<string>): FeedPost {
     authorId: p.user_id,
     authorName: p.author?.display_name ?? "A friend",
     authorAvatar: p.author?.avatar ?? null,
+    authorBot: p.author?.bot_handle ?? null,
     mine,
     likes: {
       mine: p.post_likes.some((l) => l.user_id === userId),
@@ -252,6 +258,11 @@ export async function getMe(): Promise<{
   };
 }
 
+// A profile's bot details, or null for a real person
+function botOf(p: { bot_handle: string | null; bot_bio: string | null }): Person["bot"] {
+  return p.bot_handle ? { handle: p.bot_handle, bio: p.bot_bio } : null;
+}
+
 // How a friendship row (or none) looks from my side, as on People
 function connection(
   f: { id: string; requester_id: string; status: string } | null,
@@ -270,7 +281,7 @@ function connection(
 export type PersonPage = { person: Person; posts: FeedPost[]; readAt: number };
 
 // One person's page: who they are, how you're connected, and their posts,
-// newest first. userId must already be a valid Clerk user ID (the page checks).
+// newest first. userId must already be a valid person ID (the page checks).
 // Null means Supabase couldn't be reached; "missing" means no such person.
 //
 // There's deliberately no "only if friends" check here. The posts read policy
@@ -279,7 +290,7 @@ export type PersonPage = { person: Person; posts: FeedPost[]; readAt: number };
 export async function getPersonPage(userId: string): Promise<PersonPage | "missing" | null> {
   // Checked here too, not just on the page: the id goes into the .or() filter
   // string below, so it must never contain commas, dots or brackets
-  if (!/^user_[A-Za-z0-9]+$/.test(userId)) return "missing";
+  if (!PERSON_ID.test(userId)) return "missing";
   const { userId: me } = await auth();
   if (!me) return null;
   const db = await supabase();
@@ -287,7 +298,7 @@ export async function getPersonPage(userId: string): Promise<PersonPage | "missi
   // of what I'm allowed to read (every profile; only friendships I'm in; only
   // my own and my friends' posts). They select, they don't stand in for a policy.
   const [profile, friendship, posts, books] = await Promise.all([
-    db.from("profiles").select("user_id, display_name, avatar").eq("user_id", userId).maybeSingle(),
+    db.from("profiles").select("user_id, display_name, avatar, bot_handle, bot_bio").eq("user_id", userId).maybeSingle(),
     db
       .from("friendships")
       .select("id, requester_id, status")
@@ -308,6 +319,7 @@ export async function getPersonPage(userId: string): Promise<PersonPage | "missi
       userId: profile.data.user_id,
       name: profile.data.display_name,
       avatar: profile.data.avatar,
+      bot: botOf(profile.data),
       ...connection(friendship.data, me),
     },
     readAt: Date.now(),

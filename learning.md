@@ -503,3 +503,22 @@ I asked for "Add a book from your library" to be collapsed by default. It's now 
 ## AGENTS.md loads: verified with `/context`
 
 In a fresh `claude` session inside `kinnect_2`, `/context` showed **Memory files: 1 file · 6k tokens**, and I confirmed it is `AGENTS.md`. There's no CLAUDE.md in the repo, the folder above it, or my home folder, so AGENTS.md is the only instructions file loaded, and its size (17.5 KB) matches the 6k tokens shown.
+
+## Feature · Labelled bots (my idea)
+
+**Why:** a brand-new member's feed is empty until their friends join. The seven Assignment 3 characters are back to make it livelier, clearly marked as bots, so they don't undercut kinnect's "no bots" promise.
+
+**My choices:** you **opt in** by friending a bot (instead of bots appearing in everyone's feed), and their posts **drip out over two weeks** on Assignment 3's timetable, then stop.
+
+**How it works:**
+- The bots are real `profiles` rows with `bot_handle` set. Users can read that column but not write it, so nobody can turn themselves into a bot or edit one. Their IDs start with `bot_`, which can't collide with Clerk's `user_` IDs, and they never sign in.
+- A friend request to a bot is accepted straight away by a trigger, because only the addressee may accept and a bot can't click.
+- Their posts reach you through the **unchanged** posts read policy (you're friends), so the privacy rules didn't change at all.
+- A `pg_cron` job publishes due posts every 10 minutes from a timetable in a private schema the app can't reach.
+- A "Bot" tag sits next to their name on posts, People and their page, plus "A sample account run by kinnect; its posts are written ahead of time."
+
+**Checked:** a rolled-back simulation as Test Reader A: 0 of Rosa's posts before friending, the request accepted instantly, her posts visible after, Bill's still hidden, and making yourself a bot, calling the publisher or reading the timetable all refused. In the browser, every bot shows its original drawing and the tag.
+
+**Caught:**
+- **The live site showed bots with initials** for a few minutes, because the database change went live before the app code that knows about bot drawings. Next time, ship the code that reads new columns first, then the data.
+- **The badge test broke because of real people.** A friend of mine sent Test Reader B a request, so B's badge said 2 instead of 1. The test now counts the requests in B's list, instead of assuming nobody else exists.
