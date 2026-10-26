@@ -56,10 +56,12 @@ html body {
 }
 
 /* Clerk's sign-in and sign-up cards, trimmed on their first step only (later
-   steps, like "Check your email", keep their headings). Sign in: the page's own
-   "Welcome back" above the passkey button is the heading, so Clerk's second
-   "Welcome back!" goes. Sign up: the title stays, the filler subtitle goes. */
-.cl-signIn-start .cl-header,
+   steps, like "Check your email", keep their headings). Sign in with the
+   passkey button first: the page's own "Welcome back" is the heading, so
+   Clerk's header goes. Otherwise Clerk's title stays and only its filler
+   subtitle goes, on both cards. */
+main:has(#passkey-heading) .cl-signIn-start .cl-header,
+.cl-signIn-start .cl-headerSubtitle,
 .cl-signUp-start .cl-headerSubtitle {
   display: none;
 }
