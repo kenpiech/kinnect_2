@@ -320,27 +320,19 @@ function SearchResults({
               </BookRow>
             ))}
           </ul>
+          <p className="text-[15px] text-muted">
+            Not the book you&apos;re looking for? <AddToOpenLibrary />, the free, volunteer-built catalogue kinnect
+            searches.
+          </p>
         </>
       )}
 
       {search.kind === "none" && (
         <Banner title={`No books match “${search.q}”`}>
           <p>Check the spelling, or try fewer words, like just the title or the author&apos;s last name.</p>
-          {/* Open Library is edited by volunteers, so new books are often missing.
-              Anyone can add one, and it shows up here once they've indexed it. */}
           <p className="mt-2">
             Still can&apos;t find it? kinnect searches Open Library, a free book catalogue built by volunteers, so
-            new books are sometimes missing.{" "}
-            <a
-              href="https://openlibrary.org/books/add"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-4 hover:decoration-2"
-            >
-              Add it to Open Library
-              <span className="sr-only"> (opens in a new tab)</span>
-            </a>
-            , and it&apos;ll show up here within a day or so.
+            new books are sometimes missing. <AddToOpenLibrary />, and it&apos;ll show up here within a day or so.
           </p>
         </Banner>
       )}
@@ -363,5 +355,22 @@ function SearchResults({
         </Banner>
       )}
     </div>
+  );
+}
+
+// Open Library is edited by volunteers, so new books are often missing. Anyone
+// can add one (after a free sign-up), and it shows up in kinnect's search once
+// they've indexed it.
+function AddToOpenLibrary() {
+  return (
+    <a
+      href="https://openlibrary.org/books/add"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline underline-offset-4 hover:decoration-2"
+    >
+      Add it to Open Library
+      <span className="sr-only"> (opens in a new tab)</span>
+    </a>
   );
 }
