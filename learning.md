@@ -482,3 +482,5 @@ I asked for "Add a book from your library" to be collapsed by default. It's now 
 **Worth knowing, not changed:**
 - Anyone with the link can sign up, and any signed-in account can see every member's name and avatar on People. That's the design: People needs it, and posts stay friends-only.
 - The `.env` deny rules cover Claude's file tools but not a shell command like `cat .env.local`. AGENTS.md forbids it, and a Bash deny rule could enforce it. That change to Claude's permissions is my call to make.
+
+**The literal `/security-review`, afterwards:** I ran it myself in a fresh Claude session inside `kinnect_2`, after the fixes above. The first try failed with `fatal: ambiguous argument 'origin/HEAD...'`: the command diffs against GitHub's default branch, and this repo was pushed from my Mac rather than cloned, so git had never recorded which branch that is. `git remote set-head origin --auto` fixed it (origin/HEAD → main). On the second run the command came back with **no findings worth acting on**, which matches the hand review once its fixes were in.
